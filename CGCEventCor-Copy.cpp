@@ -128,8 +128,8 @@ using namespace std;
     
     static complex<double> Bx[3][3][3];
 
-//std::mt19937_64 eng(std::random_device{}());
-std::mt19937_64 eng(145709713);
+std::mt19937_64 eng(std::random_device{}());
+//std::mt19937_64 eng(145709713); // This is a set randomizer seed
 double ran() {std::uniform_real_distribution<double> uniran(0.0,1.0); return uniran(eng);}
 
    // static complex<double> AB[2][MinArray][MinArray][3][3];
@@ -893,7 +893,6 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
    //A longitudinal for combined field
    void DeclA2()
    {
-        cout << "DECLA2" << endl;
       A2 = new complex<double>****[(Order/2)+1];
       for(int BigO=0; BigO<=(Order/2); BigO++)
       {
@@ -907,27 +906,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                for(int a=0; a<3; a++)
                {
                   A2[BigO][x][y][a] = new complex<double>[3];
-
-               if(x==300 && y==444 && a==2 && BigO==1)
-               {
-                  for(int i=0; i<3;i++)
+                  for(int b=0; b<3; b++)
                   {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << A2[1][x][y][i][j] << "   ";
-                     }
-                     cout << endl;
-                  }
-                  for(int i=0; i<3;i++)
-                  {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << A2[0][x][y][i][j] << "   ";
-                     }
-                     cout << endl;
-                  }
-               }
-
+                     A2[BigO][x][y][a][b] = 0;
+                  }                  
                }
             }
          }
@@ -977,6 +959,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                   for(int a=0; a<3; a++)
                   {
                      Ai[BigO][i][x][y][a] = new complex<double>[3];
+                     for(int b=0; b<3; b++)
+                     {
+                        Ai[BigO][i][x][y][a][b] = 0;
+                     }
                   }
                }
             }
@@ -1016,7 +1002,6 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
    //For long., order is 2*Order; for perp., order is 2*order+1
    void DeclFij()
    {
-   cout << "DECLFIJ " << endl;
       Fij = new complex<double>******[(Order/2)+1];
       for(int BigO=0; BigO<=(Order/2); BigO++)
       {
@@ -1036,27 +1021,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                      for(int a=0; a<3; a++)
                      {
                         Fij[BigO][em][i][x][y][a] = new complex<double>[3];
-
-               if(x==300 && y==444 && a==2 && em==1 && BigO==1)
-               {
-                  for(int i2=0; i2<3;i2++)
-                  {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << Fij[1][0][0][x][y][i2][j] << "   ";
-                     }
-                     cout << endl;
-                  }
-                  for(int i2=0; i2<3;i2++)
-                  {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << Fij[0][1][0][x][y][i2][j] << "   ";
-                     }
-                     cout << endl;
-                  }
-               }
-
+                        for(int b=0; b<3; b++)
+                        {
+                            Fij[BigO][em][i][x][y][a][b] = 0;
+                        }
                      }
                   }
                }
@@ -1098,7 +1066,6 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
    //Dumb dummy variables, dummy
    void DeclDum()
    {
-      cout << "DECLDUM!" << endl;
       AT = new complex<double>***[ARRAY];
       AS = new complex<double>***[ARRAY];
       for(int x=0; x<ARRAY; x++)
@@ -1113,24 +1080,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
             {
                AT[x][y][a] = new complex<double>[3];
                AS[x][y][a] = new complex<double>[3];
-               if(x==300 && y==444 && a==2)
+               for(int b=0; b<3; b++)
                {
-                  for(int i=0; i<3;i++)
-                  {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << AT[x][y][i][j] << "   ";
-                     }
-                     cout << endl;
-                  }
-                  for(int i=0; i<3;i++)
-                  {
-                     for(int j=0; j<3;j++)
-                     {
-                        cout << AS[x][y][i][j] << "   ";
-                     }
-                     cout << endl;
-                  }
+                  AT[x][y][a][b] = 0;
+                  AS[x][y][a][b] = 0;
                }
             }
          }
@@ -1244,6 +1197,19 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
             T12[BigO][x] = new double[ARRAY];
             T13[BigO][x] = new double[ARRAY];
             T23[BigO][x] = new double[ARRAY];
+            for(int y=0; y<ARRAY; y++)
+            {
+               T00[BigO][x][y] = 0;
+               T11[BigO][x][y] = 0;
+               T22[BigO][x][y] = 0;
+               T33[BigO][x][y] = 0;
+               T01[BigO][x][y] = 0;
+               T02[BigO][x][y] = 0;
+               T03[BigO][x][y] = 0;
+               T12[BigO][x][y] = 0;
+               T13[BigO][x][y] = 0;
+               T23[BigO][x][y] = 0;
+            }
          }
       }
 
@@ -1267,7 +1233,11 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
          EBGrid[BigO] = new double*[ARRAY];
          for(int x=0; x<ARRAY; x++)
          {
-               EBGrid[BigO][x] = new double[ARRAY];
+            EBGrid[BigO][x] = new double[ARRAY];
+            for(int y=0; y<ARRAY; y++)
+            {
+               EBGrid[BigO][x][y] = 0;
+            }
          }
       }
    }
@@ -4543,6 +4513,19 @@ xm[5] = 300;  ym[5] = 454;
                    }
                 }
              }
+             /*  eps ijDiDj B0 =?= 0
+             di[a][b] =
+              (Fij[0][1][0][x-2][y-2][a][b] - Fij[0][1][0][x-1][y-2][a][b]*8 + Fij[0][1][0][x+1][y-2][a][b]*8. - Fij[0][1][0][x+2][y-2][a][b])
+            - (Fij[0][1][0][x-2][y-1][a][b] - Fij[0][1][0][x-1][y-1][a][b]*8 + Fij[0][1][0][x+1][y-1][a][b]*8. - Fij[0][1][0][x+2][y-1][a][b])*8.
+            + (Fij[0][1][0][x-2][y+1][a][b] - Fij[0][1][0][x-1][y+1][a][b]*8 + Fij[0][1][0][x+1][y+1][a][b]*8. - Fij[0][1][0][x+2][y+1][a][b])*8.
+            - (Fij[0][1][0][x-2][y+2][a][b] - Fij[0][1][0][x-1][y+2][a][b]*8 + Fij[0][1][0][x+1][y+2][a][b]*8. - Fij[0][1][0][x+2][y+2][a][b]);
+             
+             for(int c=0; c<3; c++)
+             {
+             di[a][b] = di[a][b]  -I*g*(Ai[0][0][x][y][a][c]*Ai[0][0][x][y][c][b]
+                                                      - Ai[0][0][x][y][a][c]*Ai[0][1][x][y][c][b]);
+             }
+             */
 }
 
 
@@ -5538,6 +5521,87 @@ xm[5] = 300;  ym[5] = 454;
 			x++;
 //            DerVsCom<< endl;
                 } // end x loop
+
+				/* CHECKS BY RJF */
+				
+				cout << "Yang-Mills Tests" << endl << endl;
+				if(BigO==1)
+				{
+                    int x=298; int y=298;
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							complex<double> p2;
+							p2=0;
+							
+							for(int c=0; c<3; c++) 
+							{
+							    p2=p2+(Ai[0][0][x][y][a][c]*Fij[1][0][1][x][y][c][b]
+                                - Fij[1][0][1][x][y][a][c]*Ai[0][0][x][y][c][b]
+								+Ai[0][1][x][y][a][c]*Fij[1][0][2][x][y][c][b]
+                                - Fij[1][0][2][x][y][a][c]*Ai[0][1][x][y][c][b])*(I*g);
+							}
+							cout << p2 << ", " ;
+						}
+						cout << endl;
+					}
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							complex<double> p3;
+							p3=0;
+							
+							for(int c=0; c<3; c++) 
+							{
+								p3=p3+(A2[0][x][y][a][c]*Fij[0][0][0][x][y][c][b]
+                                - Fij[0][0][0][x][y][a][c]*A2[0][x][y][c][b])*(I*g);
+							}
+							cout << p3 << ", " ;
+						}
+						cout << endl;
+					}
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							complex<double> p1;
+							p1=0;
+							
+							p1 = Fij[1][0][1][x-2][y][a][b]
+                                           - Fij[1][0][1][x-1][y][a][b]*8.
+                                           + Fij[1][0][1][x+1][y][a][b]*8.
+                                           - Fij[1][0][1][x+2][y][a][b]+
+								Fij[1][0][2][x][y-2][a][b]
+                                           - Fij[1][0][2][x][y-1][a][b]*8.
+                                           + Fij[1][0][2][x][y+1][a][b]*8.
+                                           - Fij[1][0][2][x][y+2][a][b];
+							p1=p1/(12*h);
+							
+							cout << p1 << ", " ;
+						}
+						cout << endl;
+					}
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{			
+							complex<double> p1;
+							p1=0;
+							
+							p1 = Fij[0][1][0][x][y-2][a][b]
+                                           - Fij[0][1][0][x][y-1][a][b]*8.
+                                           + Fij[0][1][0][x][y+1][a][b]*8.
+                                           - Fij[0][1][0][x][y+2][a][b];
+							p1=0.5*p1/(12*h);
+
+					
+							cout << p1 << " ..... " << Fij[1][0][1][x][y][a][b] << ", " ;
+						}
+						cout << endl;
+					}
+				}
 
 				
 	}
