@@ -5714,25 +5714,8 @@ xm[5] = 300;  ym[5] = 454;
 					}
 					cout << endl;
 
-/*
-					cout << "ig[t*A,-By]" << endl;
-					for(int a=0; a<3; a++)
-					{
-						for(int b=0; b<3; b++)
-						{
-							complex<double> p3;
-							p3=0;
-							
-							for(int c=0; c<3; c++) 
-							{
-								p3=p3+(A2[0][x][y][a][c]*Fij[0][0][0][x][y][c][b]
-                                - Fij[0][0][0][x][y][a][c]*A2[0][x][y][c][b])*(I*g);
-							}
-							cout << p3 << ", " ;
-						}
-						cout << endl;
-					}
-*/
+/*************/
+
 					cout << endl << "nu = 2" << endl << endl;
 					
 					cout << "d0E2" << endl;
@@ -5808,25 +5791,8 @@ xm[5] = 300;  ym[5] = 454;
 					}
 					cout << endl;
 
-/*
-					cout << "ig[t*A,-By]" << endl;
-					for(int a=0; a<3; a++)
-					{
-						for(int b=0; b<3; b++)
-						{
-							complex<double> p3;
-							p3=0;
-							
-							for(int c=0; c<3; c++) 
-							{
-								p3=p3+(A2[0][x][y][a][c]*Fij[0][0][0][x][y][c][b]
-                                - Fij[0][0][0][x][y][a][c]*A2[0][x][y][c][b])*(I*g);
-							}
-							cout << p3 << ", " ;
-						}
-						cout << endl;
-					}
-*/
+/*************/
+
 					cout << endl << "nu = 3" << endl << endl;
 					
 					cout << "d0E3" << endl;
