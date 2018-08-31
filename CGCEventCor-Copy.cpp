@@ -128,8 +128,8 @@ using namespace std;
     
     static complex<double> Bx[3][3][3];
 
-//std::mt19937_64 eng(std::random_device{}());
-std::mt19937_64 eng(145709713);
+std::mt19937_64 eng(std::random_device{}());
+//std::mt19937_64 eng(145709713); // run with set seed: 145709713
 double ran() {std::uniform_real_distribution<double> uniran(0.0,1.0); return uniran(eng);}
 
    // static complex<double> AB[2][MinArray][MinArray][3][3];
@@ -4261,8 +4261,8 @@ xm[5] = 300;  ym[5] = 454;
                                                             + pedestal*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                             - (C*A[1][1][x+imp][y][a][c] + pedestal)*pedestal
                                                              );
-                               //B0 = eij Ig[Ai1,Aj2]
-/*                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
+/*                               //B0 = eij Ig[Ai1,Aj2]
+                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*(pedestal*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                              - (C*A[1][1][x+imp][y][a][c] + pedestal)*pedestal
                                                              - pedestal*(C*A[1][0][x+imp][y][c][b] + pedestal)
@@ -4280,8 +4280,8 @@ xm[5] = 300;  ym[5] = 454;
                                                             + (C*A[0][1][x-imp][y][a][c] + pedestal)*pedestal
                                                             - pedestal*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                              );
-                               //B0 = eij Ig[Ai1,Aj2]
-/*                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
+/*                               //B0 = eij Ig[Ai1,Aj2]
+                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*((C*A[0][0][x-imp][y][a][c] + pedestal)*pedestal
                                                              - pedestal*(C*A[0][0][x-imp][y][c][b] + pedestal)
                                                              - (C*A[0][1][x-imp][y][a][c] + pedestal)*pedestal
@@ -4298,42 +4298,38 @@ xm[5] = 300;  ym[5] = 454;
                                                             + (C*A[0][1][x-imp][y][a][c] + pedestal)*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                             - (C*A[1][1][x+imp][y][a][c] + pedestal)*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                              );
-                               //B0 = eij Ig[Ai1,Aj2]
-/*                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
+/*                               //B0 = eij Ig[Ai1,Aj2]
+                               Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*((C*A[0][0][x-imp][y][a][c] + pedestal)*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                              - (C*A[1][1][x+imp][y][a][c] + pedestal)*(C*A[0][0][x-imp][y][c][b] + pedestal)
                                                              - (C*A[0][1][x-imp][y][a][c] + pedestal)*(C*A[1][0][x+imp][y][c][b] + pedestal)
                                                              + (C*A[1][0][x+imp][y][a][c] + pedestal)*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                               );
 */
-                            }
-                            
-                            complex<double> di[3][3];
-                            
-                            di[a][b] = Ai[0][0][x][y-2][a][b]
-                            - Ai[0][0][x][y-1][a][b]*8
-                            + Ai[0][0][x][y+1][a][b]*8.
-                            - Ai[0][0][x][y+2][a][b]
 
-                            - Ai[0][1][x-2][y][a][b]
-                            + Ai[0][1][x-1][y][a][b]*8.
-                            - Ai[0][1][x+1][y][a][b]*8.
-                            + Ai[0][1][x+2][y][a][b];
+                            }
+                         }// end c
+
+                         static complex<double> di[3][3];
                             
+                         di[a][b] = Ai[0][0][x][y-2][a][b]
+                         - Ai[0][0][x][y-1][a][b]*8
+                         + Ai[0][0][x][y+1][a][b]*8.
+                         - Ai[0][0][x][y+2][a][b]
+
+                         - Ai[0][1][x-2][y][a][b]
+                         + Ai[0][1][x-1][y][a][b]*8.
+                         - Ai[0][1][x+1][y][a][b]*8.
+                         + Ai[0][1][x+2][y][a][b];
+                         
+                         di[a][b] = -di[a][b]/(12.*h);
+
                          for(int c=0; c<3; c++)
                          {
                             di[a][b] = di[a][b]  -I*g*(Ai[0][1][x][y][a][c]*Ai[0][0][x][y][c][b]
                                                       - Ai[0][0][x][y][a][c]*Ai[0][1][x][y][c][b]);
                          }
-                         Fij[0][1][0][x][y][a][b] = di[a][b];                      
-                         }
-                         /*
-                         if(a==b && a==2)
-                         {
-                            PrintFij[0] << real(Fij[0][0][0][x][y][a][b]) << "  ";
-                            PrintFij[1] << imag(Fij[0][0][0][x][y][a][b]) << "  ";
-                         }
-                         */
+                         Fij[0][1][0][x][y][a][b] = di[a][b];
                       }
                    }
 
@@ -4434,7 +4430,7 @@ xm[5] = 300;  ym[5] = 454;
                                }
                                cout << endl;
                             }
-                            }
+                            
                             cout << "Full:" << endl;
                             for(int a=0; a<3; a++)
                             {
@@ -4530,6 +4526,7 @@ xm[5] = 300;  ym[5] = 454;
                                cout << endl;
                             }
                             cout << endl;
+                            }
 
                          }
                       }
@@ -5550,6 +5547,14 @@ xm[5] = 300;  ym[5] = 454;
 				cout << "Yang-Mills Tests" << endl << endl;
 				if(BigO==1)
 				{
+                    complex<double> Summed[3][3];
+                    for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+                           Summed[a][b] = 0;
+                        }
+                    }
                     cout << "nu = 0" << endl << endl;
                     
                     int x=298; int y=298;
@@ -5570,6 +5575,7 @@ xm[5] = 300;  ym[5] = 454;
                                 - Fij[1][0][2][x][y][a][c]*Ai[0][1][x][y][c][b])*(I*g);
 							}
 							cout << p2 << ", " ;
+							Summed[a][b] = Summed[a][b] + p2;
 						}
 						cout << endl;
 					}
@@ -5589,11 +5595,24 @@ xm[5] = 300;  ym[5] = 454;
                                 - Fij[0][0][0][x][y][a][c]*A2[0][x][y][c][b])*(I*g);
 							}
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
 						}
 						cout << endl;
 					}
 					cout << endl;
 					
+					cout << "n-1 summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
 					cout << "diEi" << endl;
 					for(int a=0; a<3; a++)
 					{
@@ -5603,16 +5622,58 @@ xm[5] = 300;  ym[5] = 454;
 							p1=0;
 							
 							p1 = Fij[1][0][1][x-2][y][a][b]
-                                           - Fij[1][0][1][x-1][y][a][b]*8.
-                                           + Fij[1][0][1][x+1][y][a][b]*8.
-                                           - Fij[1][0][1][x+2][y][a][b]+
-								Fij[1][0][2][x][y-2][a][b]
-                                           - Fij[1][0][2][x][y-1][a][b]*8.
-                                           + Fij[1][0][2][x][y+1][a][b]*8.
-                                           - Fij[1][0][2][x][y+2][a][b];
+                               - Fij[1][0][1][x-1][y][a][b]*8.
+                               + Fij[1][0][1][x+1][y][a][b]*8.
+                               - Fij[1][0][1][x+2][y][a][b]
+
+                               + Fij[1][0][2][x][y-2][a][b]
+                               - Fij[1][0][2][x][y-1][a][b]*8.
+                               + Fij[1][0][2][x][y+1][a][b]*8.
+                               - Fij[1][0][2][x][y+2][a][b];
 							p1=p1/(12*h);
 							
 							cout << p1 << ", " ;
+							Summed[a][b] = Summed[a][b] + p1;
+						}
+						cout << endl;
+					}
+					cout << endl;
+					
+					/***/
+					cout << "dA check " << endl;
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							complex<double> p1;
+							p1=0;
+							
+							p1 = - Ai[1][0][x-2][y][a][b]
+                                 + Ai[1][0][x-1][y][a][b]*8.
+                                 - Ai[1][0][x+1][y][a][b]*8.
+                                 + Ai[1][0][x+2][y][a][b]
+
+                                 - Ai[1][1][x][y-2][a][b]
+                                 + Ai[1][1][x][y-1][a][b]*8.
+                                 - Ai[1][1][x][y+1][a][b]*8.
+                                 + Ai[1][1][x][y+2][a][b];
+
+							p1=p1/(12*h);
+							
+							cout << 2*p1 << ", " ;
+						}
+						cout << endl;
+					}
+					cout << endl;
+                    /***/
+					
+					cout << "n summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5640,7 +5701,15 @@ xm[5] = 300;  ym[5] = 454;
 					*/
 					
 					cout << endl << "nu = 1" << endl << endl;
-					
+
+                    for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+                           Summed[a][b] = 0;
+                        }
+                    }
+                    
 					cout << "d0E1" << endl;
 					for(int a=0; a<3; a++)
 					{
@@ -5649,9 +5718,10 @@ xm[5] = 300;  ym[5] = 454;
 							complex<double> p3;
 							p3=0;
 
-								p3=Fij[1][0][1][x][y][a][b];
+								p3=-Fij[1][0][1][x][y][a][b];
 
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
 						}
 						cout << endl;
 					}
@@ -5673,6 +5743,7 @@ xm[5] = 300;  ym[5] = 454;
 							p1=p1/(12*h);
 							
 							cout << p1 << ", " ;
+							Summed[a][b] = Summed[a][b] + p1;
 						}
 						cout << endl;
 					}
@@ -5694,6 +5765,19 @@ xm[5] = 300;  ym[5] = 454;
                                       )*I*g;
 							}
 							cout << p2 << ", " ;
+							Summed[a][b] = Summed[a][b] + p2;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+					cout << "n-1 summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5707,8 +5791,21 @@ xm[5] = 300;  ym[5] = 454;
 							complex<double> p3;
 							p3=0;
 							
-							p3 = Fij[1][0][1][x][y][a][b];
+							p3 = -Fij[1][0][1][x][y][a][b];
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
+						}
+						cout << endl;
+					}
+					cout << endl;
+					
+					cout << "n summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5718,6 +5815,14 @@ xm[5] = 300;  ym[5] = 454;
 
 					cout << endl << "nu = 2" << endl << endl;
 					
+                    for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+                           Summed[a][b] = 0;
+                        }
+                    }
+                    
 					cout << "d0E2" << endl;
 					for(int a=0; a<3; a++)
 					{
@@ -5726,9 +5831,10 @@ xm[5] = 300;  ym[5] = 454;
 							complex<double> p3;
 							p3=0;
 
-								p3=Fij[1][0][2][x][y][a][b];
+								p3=-Fij[1][0][2][x][y][a][b];
 
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
 						}
 						cout << endl;
 					}
@@ -5750,6 +5856,7 @@ xm[5] = 300;  ym[5] = 454;
 							p1=p1/(12*h);
 							
 							cout << p1 << ", " ;
+							Summed[a][b] = Summed[a][b] + p1;
 						}
 						cout << endl;
 					}
@@ -5771,6 +5878,19 @@ xm[5] = 300;  ym[5] = 454;
                                       )*I*g;
 							}
 							cout << p2 << ", " ;
+							Summed[a][b] = Summed[a][b] + p2;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+					cout << "n-1 summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5784,8 +5904,21 @@ xm[5] = 300;  ym[5] = 454;
 							complex<double> p3;
 							p3=0;
 							
-							p3 = Fij[1][0][2][x][y][a][b];
+							p3 = -Fij[1][0][2][x][y][a][b];
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+					cout << "n summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5795,6 +5928,14 @@ xm[5] = 300;  ym[5] = 454;
 
 					cout << endl << "nu = 3" << endl << endl;
 					
+                    for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+                           Summed[a][b] = 0;
+                        }
+                    }
+                    
 					cout << "d0E3" << endl;
 					for(int a=0; a<3; a++)
 					{
@@ -5803,9 +5944,10 @@ xm[5] = 300;  ym[5] = 454;
 							complex<double> p3;
 							p3=0;
 
-								p3=Fij[1][0][0][x][y][a][b];
+								p3=2*Fij[1][0][0][x][y][a][b];
 
 							cout << p3 << ", " ;
+							Summed[a][b] = Summed[a][b] + p3;
 						}
 						cout << endl;
 					}
@@ -5827,11 +5969,24 @@ xm[5] = 300;  ym[5] = 454;
                                  + Fij[1][1][1][x][y-2][a][b]
 							     - Fij[1][1][1][x][y-1][a][b]*8
 							     + Fij[1][1][1][x][y+1][a][b]*8
-							     - Fij[1][1][1][x][y+2][a][b];;
+							     - Fij[1][1][1][x][y+2][a][b];
 
 							p1=p1/(12*h);
 							
 							cout << p1 << ", " ;
+							Summed[a][b] = Summed[a][b] + p1;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+					cout << "n-1 summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
 						}
 						cout << endl;
 					}
@@ -5854,10 +6009,74 @@ xm[5] = 300;  ym[5] = 454;
                                 - Fij[1][1][1][x][y][a][c]*Ai[0][1][x][y][c][b])*(I*g);
 							}
 							cout << p2 << ", " ;
+							Summed[a][b] = Summed[a][b] + p2;
 						}
 						cout << endl;
 					}
 					cout << endl;
+
+					cout << "n summed:" << endl;
+					
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							cout << Summed[a][b] << ", " ;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+
+
+
+					cout << "dA check " << endl;
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+							complex<double> p1;
+							p1=0;
+							
+							p1 = - Ai[1][0][x-2][y][a][b]
+                                 + Ai[1][0][x-1][y][a][b]*8.
+                                 - Ai[1][0][x+1][y][a][b]*8.
+                                 + Ai[1][0][x+2][y][a][b]
+
+                                 - Ai[1][1][x][y-2][a][b]
+                                 + Ai[1][1][x][y-1][a][b]*8.
+                                 - Ai[1][1][x][y+1][a][b]*8.
+                                 + Ai[1][1][x][y+2][a][b];
+
+							p1=p1/(12*h);
+							
+							cout << 2*p1 << ", " ;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
+					cout << "[D,A] check " << endl;
+					for(int a=0; a<3; a++)
+					{
+						for(int b=0; b<3; b++)
+						{
+                            complex<double> p2;
+                            p2=0;
+							for(int c=0; c<3; c++) 
+							{
+							    p2=p2+(
+                                - Ai[0][0][x][y][a][c]*Ai[1][0][x][y][c][b]
+                                + Ai[1][0][x][y][a][c]*Ai[0][0][x][y][c][b]
+								- Ai[0][1][x][y][a][c]*Ai[1][1][x][y][c][b]
+                                + Ai[1][1][x][y][a][c]*Ai[0][1][x][y][c][b])*(I*g);
+							}
+							cout << 2*p2 << ", " ;
+						}
+						cout << endl;
+					}
+					cout << endl;
+
 
 				}
 
