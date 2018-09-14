@@ -120,7 +120,8 @@ using namespace std;
     static double*** T23;
     static double**** Recall;
     static double*** EBGrid;
-    
+    static complex<double>*** AScale;
+
     complex<double>**** AT;
     complex<double>**** AS;
 
@@ -693,6 +694,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
          for(int x=0; x<ARRAY; x++)
          {
             MuShapeCenter[nuc][x] = new double[ARRAY];
+            for(int y=0; y<ARRAY; y++)
+            {
+               MuShapeCenter[nuc][x][y] = 0;
+            }
          }
       }
    }
@@ -748,6 +753,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                for(int x=0; x<ARRAY; x++)
                {
                   CovPot[nuc][col][eta][x] = new double[ARRAY];
+                  for(int y=0; y<ARRAY; y++)
+                  {
+                     CovPot[nuc][col][eta][x][y] = 0;
+                  }
                }
             }
          }
@@ -782,6 +791,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
       for(int x=0; x<MOLDARRAY; x++)
       {
          Mold[x] = new double[MOLDARRAY];
+         for(int y=0; y<MOLDARRAY; y++)
+         {
+            Mold[x][y] = 0;
+         }
       }
    }
    
@@ -810,6 +823,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                for(int a=0; a<3; a++)
                {
                   U[nuc][x][y][a] = new complex<double>[3];
+                  for(int b=0; b<3; b++)
+                  {
+                     U[nuc][x][y][a][b] = 0;
+                  }
                }
             }
          }
@@ -857,8 +874,25 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                   for(int a=0; a<3; a++)
                   {
                      A[i][j][ax][ay][a]= new complex<double>[3];
+                     for(int b=0; b<3; b++)
+                     {
+                        A[i][j][ax][ay][a][b] = 0;
+                     }
                   }
                }
+            }
+         }
+      }
+      AScale = new complex<double>**[NG];
+      for(int col=0; col<NG; col++)
+      {
+         AScale[col] = new complex<double>*[ARRAY];
+         for(int ax=0; ax<ARRAY; ax++)
+         {
+            AScale[col][ax] = new complex<double>[ARRAY];
+            for(int bx=0; bx<ARRAY; bx++)
+            {
+               AScale[col][ax][bx] = 0;
             }
          }
       }
@@ -1128,6 +1162,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                for(int a=0; a<3; a++)
                {
                   AvU[nuc][x][y][a] = new complex<double>[3];
+                  for(int b=0; b<3; b++)
+                  {
+                     AvU[nuc][x][y][a][b] = 0;
+                  }
                }
             }
          }
@@ -1223,6 +1261,10 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
             for(int x=0; x<ARRAY; x++)
             {
                Recall[BigO][a][x] = new double[ARRAY];
+               for(int y=0; y<ARRAY; y++)
+               {
+                  Recall[BigO][a][x][y] = 0;
+               }               
             }
          }
       }
@@ -1298,6 +1340,12 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
          {
             AxCor[nuc][x] = new complex<double>[ARRAY];
             AyCor[nuc][x] = new complex<double>[ARRAY];
+            
+            for(int y=0; y<ARRAY; y++)
+            {
+               AxCor[nuc][x][y] = 0;
+               AyCor[nuc][x][y] = 0;
+            }
          }
       }
    }
@@ -1332,6 +1380,11 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
          for(int x=0; x<ARRAY; x++)
          {
             AlphaCor[nuc][x] = new double[ARRAY];
+
+            for(int y=0; y<ARRAY; y++)
+            {
+               AlphaCor[nuc][x][y] = 0;
+            }
          }
       }
    }
@@ -1358,6 +1411,11 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
       for(int x=0; x<ARRAY; x++)
       {
          T00Av[x] = new double[ARRAY];
+
+         for(int y=0; y<ARRAY; y++)
+         {
+            T00Av[x][y] = 0;
+         }
       }
    }
 
@@ -1877,6 +1935,26 @@ cout << "Fix 5" << endl;
 
 ofstream Histogram[16];
 
+Histogram[0].open("d0T00Hist.txt");
+Histogram[1].open("d1T01Hist.txt");
+Histogram[2].open("d2T02Hist.txt");
+Histogram[3].open("d3T03Hist.txt");
+
+Histogram[4].open("d0T10Hist.txt");
+Histogram[5].open("d1T11Hist.txt");
+Histogram[6].open("d2T12Hist.txt");
+Histogram[7].open("d3T13Hist.txt");
+
+Histogram[8].open("d0T20Hist.txt");
+Histogram[9].open("d1T21Hist.txt");
+Histogram[10].open("d2T22Hist.txt");
+Histogram[11].open("d3T23Hist.txt");
+
+Histogram[12].open("d0T30Hist.txt");
+Histogram[13].open("d1T31Hist.txt");
+Histogram[14].open("d2T32Hist.txt");
+Histogram[15].open("d3T33Hist.txt");
+/*
 Histogram[0].open("T00Hist.txt");
 Histogram[1].open("T01Hist.txt");
 Histogram[2].open("T02Hist.txt");
@@ -1892,7 +1970,7 @@ Histogram[11].open("T22DerHist.txt");
 Histogram[12].open("L2Hist.txt");
 Histogram[13].open("CSCharge.txt");
 Histogram[14].open("CSChargeSquare.txt");
-Histogram[15].open("CSChargeAbs.txt");
+Histogram[15].open("CSChargeAbs.txt");*/
 
 
 
@@ -1963,8 +2041,8 @@ Histogram[15].open("CSChargeAbs.txt");
 
        DeclRho();
 
-//       for(int x = 0; x<ARRAY; x++)
-       for(int x = 0; x<(ARRAY-1)/2; x++)
+       for(int x = 0; x<ARRAY; x++)
+//       for(int x = 0; x<(ARRAY-1)/2; x++)
        {
            for(int y = 0; y<ARRAY; y++)
            {
@@ -2033,7 +2111,7 @@ Histogram[15].open("CSChargeAbs.txt");
                    //Scale by Sqrt(mu) to scale strength
                    //Scale by hCG to account for coarse graining (1/hCG) and include summation element for sum in alpha (hCG*hCG)
                    RhoCG[nuc][col][eta][x][y] = RhoCG[nuc][col][eta][x][y]*sqrt(MuShape[nuc][x][y])*g*h;
-                   RhoCG[nuc][col][eta][ARRAY-1-x][y] = -RhoCG[nuc][col][eta][x][y];
+//                   RhoCG[nuc][col][eta][ARRAY-1-x][y] = -RhoCG[nuc][col][eta][x][y];
                }
            }//close y loop
        }//close x loop
@@ -2645,11 +2723,6 @@ DON'T FORGET MIDDLE PIECE*/
                 }
              }
           }
-          int i2=300; int j2=444;
-          {
-             cout << "Alpha(k=0,0) for nuc " << nuc << " col " << col << " eta " << eta << endl;
-             cout << rhoalpha[i2*ARRAY + j2][0] << " ,  " << rhoalpha[i2*ARRAY + j2][1] << endl;
-          }
 
           fftw_execute(q); //rhoalpha -> alpha(x)
 
@@ -2680,14 +2753,6 @@ if(eta==0 && col==1)
                 CovPot[nuc][col][eta][i][j] = rhoalpha[i*ARRAY + j][0]/(ARRAY*ARRAY);
              }
           }
-          
-   //       int i2=300; int j2=444;
-               {
-                  cout << "Alpha for nuc " << nuc << " col " << col << " eta " << eta << endl;
-                  cout << CovPot[nuc][col][eta][i2][j2] << endl;
-                  cout << "-1, +1" << endl;
-                  cout << CovPot[nuc][col][eta][i2-1][j2] << "   " << CovPot[nuc][col][eta][i2+1][j2] << endl;
-               }
 
 /*
           if(nuc==0 && col==0 && eta==0)
@@ -3312,6 +3377,7 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
                                            UUd[0][0]*UUd[1][2]*UUd[2][1] -
                                            UUd[0][1]*UUd[1][0]*UUd[2][2];
 
+/*
                          if( (x==144 && y==215) || (x==341 && y==300)|| (x==144 && y==215) || (x==300 && y==444) )
                          {
                          cout << "FOR NUC = " << nuc << " at x " << x << " and y " << y << endl;
@@ -3324,6 +3390,7 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
                       cout << UUd[1][0] << "   " << UUd[1][1] << "   " << UUd[1][2] << endl;
                       cout << UUd[2][0] << "   " << UUd[2][1] << "   " << UUd[2][2] << endl << endl;
                       }
+*/
 
 /*                    double trashval;
                       cin >> trashval;                      
@@ -3383,6 +3450,10 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
           cout << "Calculation A for N = " << n << endl;
           for(int nuc = 0; nuc<2; nuc++)
           {
+          ofstream SingleA[2];
+          SingleA[0].open("A22.txt");
+          SingleA[1].open("A12.txt");
+          
           for(int x = 2; x<ARRAY-2; x++)
              {
                 for(int y = 2; y<ARRAY-2; y++)
@@ -3410,14 +3481,14 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
                          
                          complex<double> UUdyB;
                          UUdyB = 0.;
-                         
+*/
                          //Centered Derivative (2nd order in h)
                          complex<double> UUdx2; //Element of UUd that are relevant- "a, bth element"
                          UUdx2 = 0.;
                          
                          complex<double> UUdy2;
                          UUdy2 = 0.;
-*/
+
                          //Centered Derivative (2nd order in h)
 
                          complex<double> UUdx4[4]; //Element of UUd that are relevant- "a, bth element"
@@ -3448,13 +3519,13 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
                             //Backward
                             UUdxB=UUdxB + U[x][y][a][c]*conj(U[x-1][y][b][c]);
                             UUdyB=UUdyB + U[x][y][a][c]*conj(U[x][y-1][b][c]);
-                            
+                         */   
                             //2nd order
-                            UUdx2=UUdx2 - U[x][y][a][c]*conj(U[x-1][y][b][c])
-                                        + U[x][y][a][c]*conj(U[x+1][y][b][c]);
-                            UUdy2=UUdy2 - U[x][y][a][c]*conj(U[x][y-1][b][c])
-                                        + U[x][y][a][c]*conj(U[x][y+1][b][c]);
-                         */
+                            UUdx2=UUdx2 - U[nuc][x][y][a][c]*conj(U[nuc][x-1][y][b][c])
+                                        + U[nuc][x][y][a][c]*conj(U[nuc][x+1][y][b][c]);
+                            UUdy2=UUdy2 - U[nuc][x][y][a][c]*conj(U[nuc][x][y-1][b][c])
+                                        + U[nuc][x][y][a][c]*conj(U[nuc][x][y+1][b][c]);
+                         
                             //4th order
 
                             UUdx4[0]=UUdx4[0] + U[nuc][x][y][a][c]*conj(U[nuc][x-2][y][b][c]);
@@ -3483,6 +3554,8 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
                           A[nuc][0][x][y][a][b] = -I*(UUdx4[0]+UUdx4[1]+UUdx4[2]+UUdx4[3])/(g*12*h);
                           A[nuc][1][x][y][a][b] = -I*(UUdy4[0]+UUdy4[1]+UUdy4[2]+UUdy4[3])/(g*12*h);
                           
+//                          A[nuc][0][x][y][a][b] = -I*(UUdx2)/(g*2*h);
+//                          A[nuc][1][x][y][a][b] = -I*(UUdy2)/(g*2*h);
                           
                          /*
                           A[nuc][0][x][y][a][b] = -I*(Id-UUdx)/(g*h);
@@ -3502,7 +3575,9 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
 
                          if(a==b && a==2)
                          {
-                            
+                            SingleA[0] << real(A[nuc][0][x][y][a][b]) << "  ";
+                            SingleA[1] << imag(A[nuc][1][x][y][a-1][b]) << "  ";
+
 /*                         if( (x==144 && y==215) || (x==54 && y==514) || (x==341 && y==300) || (x==98 && y==277) || (x==144 && y==215) || (x==300 && y==444) )
                          {
                           cout << "U,x,y:" << endl;
@@ -3989,9 +4064,11 @@ if(nuc==0 && x==300 && y==444 && nuc==0 && q==2 && r==2)
           cout << real(color[0][col]) << " vs " << imag(color[0][col]) << endl << endl;
 }
 */
+
                                 }
                              }
                           }
+
                           /*
                           ForwardOrder << endl;
                           BackwardOrder << endl;
@@ -4015,7 +4092,509 @@ if(nuc==0 && x==300 && y==444 && nuc==0 && q==2 && r==2)
                    }
                 }// end y loop
 
+                SingleA[0] << endl;
+                SingleA[1] << endl;
+
              }
+             
+/*********/
+/*CLEAN B*/
+/*********/
+if(false)
+{
+             for(int x = 2; x<ARRAY-2; x++)
+             {
+                for(int y = 2; y<ARRAY-2; y++)
+                {
+                   static complex<double> di[3][3][2];
+                   for(int a=0; a<3; a++)
+                   {
+                      for(int b=0; b<3; b++)
+                      {
+                         for(int c=0; c<2; c++)
+                         {
+                            di[a][b][c] = 0.;
+                         }
+                      }
+                   }
+                   
+                   for(int a=0; a<3; a++)
+                   {
+                      for(int b=0; b<3; b++)
+                      {
+                         di[a][b][0] = 
+                           A[nuc][0][x][y-2][a][b]
+                         - A[nuc][0][x][y-1][a][b]*8
+                         + A[nuc][0][x][y+1][a][b]*8.
+                         - A[nuc][0][x][y+2][a][b]
+
+                         - A[nuc][1][x-2][y][a][b]
+                         + A[nuc][1][x-1][y][a][b]*8.
+                         - A[nuc][1][x+1][y][a][b]*8.
+                         + A[nuc][1][x+2][y][a][b];
+                         
+                         di[a][b][0] = -di[a][b][0]/(12.*h);
+
+                         for(int c=0; c<3; c++)
+                         {
+                            di[a][b][1] = di[a][b][1]  -I*g*(A[nuc][1][x][y][a][c]*A[nuc][0][x][y][c][b]
+                                                       - A[nuc][0][x][y][a][c]*A[nuc][1][x][y][c][b]);
+                         }
+                      }
+                   }
+
+                   complex<double> color[2][8];
+
+                   for(int col=0; col<8; col++)
+                   {
+                      for(int dir=0; dir<2; dir++)
+                      {
+                         color[dir][col]=0.;
+                      }
+                   }
+
+                   for(int col=0; col<8; col++)
+                   {
+                      for(int c=0; c<3; c++)
+                      {
+                         for(int dir=0; dir<2; dir++)
+                         {
+                            color[dir][col]= color[dir][col] + (t[col][0][c]*di[c][0][dir] + t[col][1][c]*di[c][1][dir] + t[col][2][c]*di[c][2][dir])/2.;
+                         }
+                      }
+                      AScale[col][x][y] = -color[0][col]/color[1][col];
+                   }
+                }
+             }
+ /***AScale Now Generated for all (x,y) of this nuc, remake A yet again:***/
+
+             for(int x = 2; x<ARRAY-2; x++)
+             {
+                for(int y = 2; y<ARRAY-2; y++)
+                {
+                   complex<double> color[2][8];
+                   for(int col=0; col<8; col++)
+                   {
+                      for(int dir=0; dir<2; dir++)
+                      {
+                         color[dir][col]=0.;
+                      }
+                   }
+                   for(int col=0; col<8; col++)
+                   {
+                      for(int dir=0; dir<2; dir++)
+                      {
+                         for(int c=0; c<3; c++)
+                         {
+                            color[dir][col]= color[dir][col] + (t[col][0][c]*A[nuc][dir][x][y][c][0] + t[col][1][c]*A[nuc][dir][x][y][c][1] + t[col][2][c]*A[nuc][dir][x][y][c][2])/2.;
+                         }
+                      }
+                   }
+
+                   //Forget old Transformation...
+
+                   for(int q=0; q<3; q++)
+                   {
+                      for(int r=0; r<3; r++)
+                      {
+                         A[nuc][0][x][y][q][r] = 0;
+                         A[nuc][1][x][y][q][r] = 0;
+                      }
+                   }
+
+                   //Remake with real part of color calculated
+                   for(int q=0; q<3; q++)
+                   {
+                      for(int r=0; r<3; r++)
+                      {
+                         for(int col=0; col<8; col++)
+                         {
+                            A[nuc][0][x][y][q][r] = A[nuc][0][x][y][q][r] +
+                                                    real(color[0][col])*t[col][q][r];
+                            A[nuc][1][x][y][q][r] = A[nuc][1][x][y][q][r] +
+                                                    real(color[1][col])*t[col][q][r];
+                         }
+                      }
+                   }
+                   if(x==256 && y==332)
+                   {
+                      cout << "Color Fix Print: " << endl;
+                         for(int cl=0; cl<8;cl++)
+                         {
+                            cout << color[0][cl] << "  ";
+                         }
+                      cout << endl << endl;
+                      
+                      cout << "Color Scale Print: " << endl;
+                         for(int cl=0; cl<8;cl++)
+                         {
+                            cout << AScale[cl][x][y] << "  ";
+                         }
+                      cout << endl << endl;
+                   }
+                }
+             }
+}
+/***********/
+/*CLEANED B*/
+/***********/
+
+
+
+             int xx=256; int yy=332;
+             
+             complex<double> di[4][3][3];
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   //d2 U
+                   di[0][a][b] = U[nuc][xx][yy-2][a][b]
+                               - U[nuc][xx][yy-1][a][b]*8
+                               + U[nuc][xx][yy+1][a][b]*8.
+                               - U[nuc][xx][yy+2][a][b];
+                   //d1 U
+                   di[1][a][b] = U[nuc][xx-2][yy][a][b]
+                               - U[nuc][xx-1][yy][a][b]*8
+                               + U[nuc][xx+1][yy][a][b]*8.
+                               - U[nuc][xx+2][yy][a][b];
+                   //d2 Udag
+                   di[2][a][b] = conj(U[nuc][xx][yy-2][b][a])
+                               - conj(U[nuc][xx][yy-1][b][a])*8
+                               + conj(U[nuc][xx][yy+1][b][a])*8.
+                               - conj(U[nuc][xx][yy+2][b][a]);
+                   //d1 Udag
+                   di[3][a][b] = conj(U[nuc][xx-2][yy][b][a])
+                               - conj(U[nuc][xx-1][yy][b][a])*8
+                               + conj(U[nuc][xx+1][yy][b][a])*8.
+                               - conj(U[nuc][xx+2][yy][b][a]);
+                }
+             }
+
+             complex<double> UTest[3][3];
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "UTest" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                 d2 U d1 Udag           d1 U d2 Udag
+                      UTest[a][b] = UTest[a][b] - I*(di[0][a][c]*di[3][c][b] - di[1][a][c]*di[2][c][b])/(144.*g*h*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+/**********************************************/
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   //d2 U
+                   di[0][a][b] = - U[nuc][xx][yy-1][a][b]
+                                 + U[nuc][xx][yy+1][a][b];
+                   //d1 U
+                   di[1][a][b] = - U[nuc][xx-1][yy][a][b]
+                                 + U[nuc][xx+1][yy][a][b];
+                   //d2 Udag
+                   di[2][a][b] = - conj(U[nuc][xx][yy-1][b][a])
+                                 + conj(U[nuc][xx][yy+1][b][a]);
+                   //d1 Udag
+                   di[3][a][b] = - conj(U[nuc][xx-1][yy][b][a])
+                                 + conj(U[nuc][xx+1][yy][b][a]);
+                }
+             }
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+                                                                                                                                        
+             cout << "UTest 1st order acc7" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                 d2 U d1 Udag           d1 U d2 Udag
+                      UTest[a][b] = UTest[a][b] + I*(di[0][a][c]*di[3][c][b] - di[1][a][c]*di[2][c][b])/(4.*h*h*g);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+             
+/**********************************************/
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   di[0][a][b] = 0.;
+                   di[1][a][b] = 0.;
+                }
+             }
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c=0; c<3; c++)
+                   {
+                      //d2 UUdag
+                      di[0][a][b] = di[0][a][b] + U[nuc][xx][yy-2][a][c]*conj(U[nuc][xx][yy-2][b][c])
+                                  - U[nuc][xx][yy-1][a][c]*conj(U[nuc][xx][yy-1][b][c])*8
+                                  + U[nuc][xx][yy+1][a][c]*conj(U[nuc][xx][yy+1][b][c])*8.
+                                  - U[nuc][xx][yy+2][a][c]*conj(U[nuc][xx][yy+2][b][c]);
+                      //d1 UUdag
+                      di[1][a][b] = di[1][a][b] + U[nuc][xx-2][yy][a][c]*conj(U[nuc][xx-2][yy][b][c])
+                                  - U[nuc][xx-1][yy][a][c]*conj(U[nuc][xx-1][yy][b][c])*8
+                                  + U[nuc][xx+1][yy][a][c]*conj(U[nuc][xx+1][yy][b][c])*8.
+                                  - U[nuc][xx+2][yy][a][c]*conj(U[nuc][xx+2][yy][b][c]);
+                   }
+                }
+             }
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "d2UUdag Test" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   cout << di[0][a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+             cout << "d1UUdag Test" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   cout << di[1][a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+/**********************************************/
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   //d1d2 U
+                   di[0][a][b] = conj(U[nuc][xx-2][yy-2][b][a] - U[nuc][xx-2][yy-1][b][a]*8 + U[nuc][xx-2][yy+1][b][a]*8. - U[nuc][xx-2][yy+2][b][a])
+                               - conj(U[nuc][xx-1][yy-2][b][a] - U[nuc][xx-1][yy-1][b][a]*8 + U[nuc][xx-1][yy+1][b][a]*8. - U[nuc][xx-1][yy+2][b][a])*8.
+                               + conj(U[nuc][xx+1][yy-2][b][a] - U[nuc][xx+1][yy-1][b][a]*8 + U[nuc][xx+1][yy+1][b][a]*8. - U[nuc][xx+1][yy+2][b][a])*8.
+                               - conj(U[nuc][xx+2][yy-2][b][a] - U[nuc][xx+2][yy-1][b][a]*8 + U[nuc][xx+2][yy+1][b][a]*8. - U[nuc][xx+2][yy+2][b][a]);
+                   //d2d1 U
+                   di[1][a][b] = conj(U[nuc][xx-2][yy-2][b][a] - U[nuc][xx-1][yy-2][b][a]*8 + U[nuc][xx+1][yy-2][b][a]*8. - U[nuc][xx+2][yy-2][b][a])
+                               - conj(U[nuc][xx-2][yy-1][b][a] - U[nuc][xx-1][yy-1][b][a]*8 + U[nuc][xx+1][yy-1][b][a]*8. - U[nuc][xx+2][yy-1][b][a])*8.
+                               + conj(U[nuc][xx-2][yy+1][b][a] - U[nuc][xx-1][yy+1][b][a]*8 + U[nuc][xx+1][yy+1][b][a]*8. - U[nuc][xx+2][yy+1][b][a])*8.
+                               - conj(U[nuc][xx-2][yy+2][b][a] - U[nuc][xx-1][yy+2][b][a]*8 + U[nuc][xx+1][yy+2][b][a]*8. - U[nuc][xx+2][yy+2][b][a]);
+                }
+             }
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "Ud1d2Udag" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                 U d1d2 Udag
+                      UTest[a][b] = UTest[a][b] - (U[nuc][xx][yy][a][c]*di[0][c][b])/(144.*g*h*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "Ud2d1Udag" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                 U d1d2 Udag
+                      UTest[a][b] = UTest[a][b] - (U[nuc][xx][yy][a][c]*di[1][c][b])/(144.*g*h*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+/**********************************************/
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   //d2 U
+                   di[0][a][b] = U[nuc][xx][yy-2][a][b]
+                               - U[nuc][xx][yy-1][a][b]*8
+                               + U[nuc][xx][yy+1][a][b]*8.
+                               - U[nuc][xx][yy+2][a][b];
+                   //d1 U
+                   di[1][a][b] = U[nuc][xx-2][yy][a][b]
+                               - U[nuc][xx-1][yy][a][b]*8
+                               + U[nuc][xx+1][yy][a][b]*8.
+                               - U[nuc][xx+2][yy][a][b];
+                   //d2 Udag
+                   di[2][a][b] = conj(U[nuc][xx][yy-2][b][a])
+                               - conj(U[nuc][xx][yy-1][b][a])*8
+                               + conj(U[nuc][xx][yy+1][b][a])*8.
+                               - conj(U[nuc][xx][yy+2][b][a]);
+                   //d1 Udag
+                   di[3][a][b] = conj(U[nuc][xx-2][yy][b][a])
+                               - conj(U[nuc][xx-1][yy][b][a])*8
+                               + conj(U[nuc][xx+1][yy][b][a])*8.
+                               - conj(U[nuc][xx+2][yy][b][a]);
+                }
+             }
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "(d1U)Udag" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                              d1 U         Udag
+                      UTest[a][b] = UTest[a][b] - I*(di[1][a][c]*conj(U[nuc][xx][yy][b][c]))/(12*g*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "U(d1Udag)" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                         U         d1Udag
+                      UTest[a][b] = UTest[a][b] - I*(U[nuc][xx][yy][a][c]*di[3][c][b])/(12*g*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "(d2U)Udag" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                              d2 U         Udag
+                      UTest[a][b] = UTest[a][b] - I*(di[0][a][c]*conj(U[nuc][xx][yy][b][c]))/(12*g*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   UTest[a][b] = 0.;
+                }
+             }
+
+             cout << "U(d2Udag)" << endl << endl;
+             for(int a=0; a<3; a++)
+             {
+                for(int b=0; b<3; b++)
+                {
+                   for(int c = 0; c<3; c++)
+                   {
+                      //                                         U         d2Udag
+                      UTest[a][b] = UTest[a][b] - I*(U[nuc][xx][yy][a][c]*di[2][c][b])/(12*g*h);
+                   }
+                   cout << UTest[a][b] << "  ";
+                }
+                cout << endl;
+             }
+             cout << endl;
+
+/**********************************************/
 
              for(int x = 0; x<ARRAY; x++)
              {
@@ -4261,14 +4840,14 @@ xm[5] = 300;  ym[5] = 454;
                                                             + pedestal*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                             - (C*A[1][1][x+imp][y][a][c] + pedestal)*pedestal
                                                              );
-/*                               //B0 = eij Ig[Ai1,Aj2]
+                               //B0 = eij Ig[Ai1,Aj2]
                                Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*(pedestal*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                              - (C*A[1][1][x+imp][y][a][c] + pedestal)*pedestal
                                                              - pedestal*(C*A[1][0][x+imp][y][c][b] + pedestal)
                                                              + (C*A[1][0][x+imp][y][a][c] + pedestal)*pedestal
                                                               );
-*/
+
 
                           }
                             else if(x+imp > ARRAY-1)
@@ -4280,14 +4859,14 @@ xm[5] = 300;  ym[5] = 454;
                                                             + (C*A[0][1][x-imp][y][a][c] + pedestal)*pedestal
                                                             - pedestal*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                              );
-/*                               //B0 = eij Ig[Ai1,Aj2]
+                               //B0 = eij Ig[Ai1,Aj2]
                                Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*((C*A[0][0][x-imp][y][a][c] + pedestal)*pedestal
                                                              - pedestal*(C*A[0][0][x-imp][y][c][b] + pedestal)
                                                              - (C*A[0][1][x-imp][y][a][c] + pedestal)*pedestal
                                                              + pedestal*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                               );
-*/
+
                             }
                             else
                             {
@@ -4298,18 +4877,18 @@ xm[5] = 300;  ym[5] = 454;
                                                             + (C*A[0][1][x-imp][y][a][c] + pedestal)*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                             - (C*A[1][1][x+imp][y][a][c] + pedestal)*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                              );
-/*                               //B0 = eij Ig[Ai1,Aj2]
+                               //B0 = eij Ig[Ai1,Aj2]
                                Fij[0][1][0][x][y][a][b] = Fij[0][1][0][x][y][a][b] 
                                                         + I*g*((C*A[0][0][x-imp][y][a][c] + pedestal)*(C*A[1][1][x+imp][y][c][b] + pedestal)
                                                              - (C*A[1][1][x+imp][y][a][c] + pedestal)*(C*A[0][0][x-imp][y][c][b] + pedestal)
                                                              - (C*A[0][1][x-imp][y][a][c] + pedestal)*(C*A[1][0][x+imp][y][c][b] + pedestal)
                                                              + (C*A[1][0][x+imp][y][a][c] + pedestal)*(C*A[0][1][x-imp][y][c][b] + pedestal)
                                                               );
-*/
+
 
                             }
                          }// end c
-
+                         /*
                          static complex<double> di[3][3];
                             
                          di[a][b] = Ai[0][0][x][y-2][a][b]
@@ -4330,6 +4909,7 @@ xm[5] = 300;  ym[5] = 454;
                                                       - Ai[0][0][x][y][a][c]*Ai[0][1][x][y][c][b]);
                          }
                          Fij[0][1][0][x][y][a][b] = di[a][b];
+                         */
                       }
                    }
 
@@ -4355,25 +4935,25 @@ xm[5] = 300;  ym[5] = 454;
                             - Ai[0][1][x+1][y][a][b]*8.
                             + Ai[0][1][x+2][y][a][b];
                             
-                            di2[a][b][1] = A[0][0][x-imp][y-2][a][b]
-                            - A[0][0][x-imp][y-1][a][b]*8.
-                            + A[0][0][x-imp][y+1][a][b]*8.
-                            - A[0][0][x-imp][y+2][a][b];
+                            di2[a][b][1] = C*A[0][0][x-imp][y-2][a][b]
+                            - C*A[0][0][x-imp][y-1][a][b]*8.
+                            + C*A[0][0][x-imp][y+1][a][b]*8.
+                            - C*A[0][0][x-imp][y+2][a][b];
 
-                            di2[a][b][2] = - A[0][1][x-2-imp][y][a][b]
-                            + A[0][1][x-1-imp][y][a][b]*8.
-                            - A[0][1][x+1-imp][y][a][b]*8.
-                            + A[0][1][x+2-imp][y][a][b];
+                            di2[a][b][2] = - C*A[0][1][x-2-imp][y][a][b]
+                            + C*A[0][1][x-1-imp][y][a][b]*8.
+                            - C*A[0][1][x+1-imp][y][a][b]*8.
+                            + C*A[0][1][x+2-imp][y][a][b];
                             
-                            di3[a][b][1] = A[1][0][x+imp][y-2][a][b]
-                            - A[1][0][x+imp][y-1][a][b]*8.
-                            + A[1][0][x+imp][y+1][a][b]*8.
-                            - A[1][0][x+imp][y+2][a][b];
+                            di3[a][b][1] = C*A[1][0][x+imp][y-2][a][b]
+                            - C*A[1][0][x+imp][y-1][a][b]*8.
+                            + C*A[1][0][x+imp][y+1][a][b]*8.
+                            - C*A[1][0][x+imp][y+2][a][b];
 
-                            di3[a][b][2] = - A[1][1][x-2+imp][y][a][b]
-                            + A[1][1][x-1+imp][y][a][b]*8.
-                            - A[1][1][x+1+imp][y][a][b]*8.
-                            + A[1][1][x+2+imp][y][a][b];
+                            di3[a][b][2] = - C*A[1][1][x-2+imp][y][a][b]
+                            + C*A[1][1][x-1+imp][y][a][b]*8.
+                            - C*A[1][1][x+1+imp][y][a][b]*8.
+                            + C*A[1][1][x+2+imp][y][a][b];
                             
                             di[a][b] = -di[a][b]/(12.*h);
                             di2[a][b][0] = -(di2[a][b][1]+di2[a][b][2])/(12.*h);
@@ -4383,10 +4963,10 @@ xm[5] = 300;  ym[5] = 454;
                          {
                             di[a][b] = di[a][b]  -I*g*(Ai[0][1][x][y][a][c]*Ai[0][0][x][y][c][b]
                                                       - Ai[0][0][x][y][a][c]*Ai[0][1][x][y][c][b]);
-                            di2[a][b][3] = di2[a][b][3]  -I*g*(A[0][1][x-imp][y][a][c]*A[0][0][x-imp][y][c][b]
-                                                      - A[0][0][x-imp][y][a][c]*A[0][1][x-imp][y][c][b]);
-                            di3[a][b][3] = di3[a][b][3]  -I*g*(A[1][1][x+imp][y][a][c]*A[1][0][x+imp][y][c][b]
-                                                      - A[1][0][x+imp][y][a][c]*A[1][1][x+imp][y][c][b]);
+                            di2[a][b][3] = di2[a][b][3]  -I*g*(C*A[0][1][x-imp][y][a][c]*C*A[0][0][x-imp][y][c][b]
+                                                      - C*A[0][0][x-imp][y][a][c]*C*A[0][1][x-imp][y][c][b]);
+                            di3[a][b][3] = di3[a][b][3]  -I*g*(C*A[1][1][x+imp][y][a][c]*C*A[1][0][x+imp][y][c][b]
+                                                      - C*A[1][0][x+imp][y][a][c]*C*A[1][1][x+imp][y][c][b]);
                          }
                          di2[a][b][0] = di2[a][b][0]+di2[a][b][3];
                          di3[a][b][0] = di3[a][b][0]+di3[a][b][3];
@@ -4399,7 +4979,7 @@ xm[5] = 300;  ym[5] = 454;
                             {
                                for(int bb=0; bb<3; bb++)
                                {
-                                  cout << A[0][0][x][y][aa][bb] << "  ";
+                                  cout << C*A[0][0][x][y][aa][bb] << "  ";
                                }
                                cout << endl;
                             }
@@ -4408,7 +4988,7 @@ xm[5] = 300;  ym[5] = 454;
                             {
                                for(int bb=0; bb<3; bb++)
                                {
-                                  cout << A[1][0][x][y][aa][bb] << "  ";
+                                  cout << C*A[1][0][x][y][aa][bb] << "  ";
                                }
                                cout << endl;
                             }
@@ -4417,7 +4997,7 @@ xm[5] = 300;  ym[5] = 454;
                             {
                                for(int bb=0; bb<3; bb++)
                                {
-                                  cout << A[0][1][x][y][aa][bb] << "  ";
+                                  cout << C*A[0][1][x][y][aa][bb] << "  ";
                                }
                                cout << endl;
                             }
@@ -4426,7 +5006,7 @@ xm[5] = 300;  ym[5] = 454;
                             {
                                for(int bb=0; bb<3; bb++)
                                {
-                                  cout << A[1][1][x][y][aa][bb] << "  ";
+                                  cout << C*A[1][1][x][y][aa][bb] << "  ";
                                }
                                cout << endl;
                             }
@@ -4503,6 +5083,24 @@ xm[5] = 300;  ym[5] = 454;
                                for(int b=0; b<3; b++)
                                {
                                   cout << di3[a][b][2] << "  ";
+                               }
+                               cout << endl;
+                            }
+                            cout << "diAj" << endl;
+                            for(int a=0; a<3; a++)
+                            {
+                               for(int b=0; b<3; b++)
+                               {
+                                  cout << di2[a][b][1]+di2[a][b][2] << "  ";
+                               }
+                               cout << endl;
+                            }
+                            cout << endl;
+                            for(int a=0; a<3; a++)
+                            {
+                               for(int b=0; b<3; b++)
+                               {
+                                  cout << di3[a][b][1]+di3[a][b][2] << "  ";
                                }
                                cout << endl;
                             }
@@ -7019,11 +7617,78 @@ xm[5] = 300;  ym[5] = 454;
                double L11=0;
                double L12=0;
                double L13=0;
+               double L14=0;
+               double L15=0;
 
                for(int x=2; x<ARRAY-2; x++)
                {
                   for(int y=2; y<ARRAY-2; y++)
                   {
+                     L0 = L0 + BigO*2*(T00[BigO][x][y] - Recall[BigO][0][x][y]);
+
+                     L1 = L1 + ((T01[BigO][x-2][y] - Recall[BigO][1][x-2][y] )
+                              - (T01[BigO][x-1][y] - Recall[BigO][1][x-1][y] )*8.
+                              + (T01[BigO][x+1][y] - Recall[BigO][1][x+1][y] )*8.
+                              - (T01[BigO][x+2][y] - Recall[BigO][1][x+2][y] )
+                               );
+                     
+                     L2 = L2 + ((T02[BigO][x][y-2] - Recall[BigO][2][x][y-2] )
+                              - (T02[BigO][x][y-1] - Recall[BigO][2][x][y-1] )*8.
+                              + (T02[BigO][x][y+1] - Recall[BigO][2][x][y+1] )*8.
+                              - (T02[BigO][x][y+2] - Recall[BigO][2][x][y+2] )
+                               );
+                               
+                     L3 = L3 + (T00[BigO][x][y] - Recall[BigO][0][x][y]) + (T33[BigO][x][y] - Recall[BigO][9][x][y]);
+/******************/
+                     L4 = L4 + (BigO*2-1)*(T01[BigO][x][y] - Recall[BigO][1][x][y]);
+
+                     L5 = L5 + ((T11[BigO][x-2][y] - Recall[BigO][4][x-2][y] )
+                              - (T11[BigO][x-1][y] - Recall[BigO][4][x-1][y] )*8.
+                              + (T11[BigO][x+1][y] - Recall[BigO][4][x+1][y] )*8.
+                              - (T11[BigO][x+2][y] - Recall[BigO][4][x+2][y] )
+                               );
+                     
+                     L6 = L6 + ((T12[BigO][x][y-2] - Recall[BigO][5][x][y-2] )
+                              - (T12[BigO][x][y-1] - Recall[BigO][5][x][y-1] )*8.
+                              + (T12[BigO][x][y+1] - Recall[BigO][5][x][y+1] )*8.
+                              - (T12[BigO][x][y+2] - Recall[BigO][5][x][y+2] )
+                               );
+                               
+                     L7 = L7 + (T01[BigO][x][y] - Recall[BigO][1][x][y]);
+/******************/
+                     L8 = L8 + (BigO*2-1)*(T02[BigO][x][y] - Recall[BigO][2][x][y]);
+
+                     L9 = L9 + ((T12[BigO][x-2][y] - Recall[BigO][5][x-2][y] )
+                              - (T12[BigO][x-1][y] - Recall[BigO][5][x-1][y] )*8.
+                              + (T12[BigO][x+1][y] - Recall[BigO][5][x+1][y] )*8.
+                              - (T12[BigO][x+2][y] - Recall[BigO][5][x+2][y] )
+                               );
+                     
+                     L10= L10 + ((T22[BigO][x][y-2] - Recall[BigO][7][x][y-2] )
+                               - (T22[BigO][x][y-1] - Recall[BigO][7][x][y-1] )*8.
+                               + (T22[BigO][x][y+1] - Recall[BigO][7][x][y+1] )*8.
+                               - (T22[BigO][x][y+2] - Recall[BigO][7][x][y+2] )
+                               );
+                               
+                     L11= L11 + (T02[BigO][x][y] - Recall[BigO][2][x][y]);
+/******************/
+                     L12= L12 + BigO*2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
+
+                     L13= L13 + ((T13[BigO][x-2][y] - Recall[BigO][6][x-2][y] )
+                               - (T13[BigO][x-1][y] - Recall[BigO][6][x-1][y] )*8.
+                               + (T13[BigO][x+1][y] - Recall[BigO][6][x+1][y] )*8.
+                               - (T13[BigO][x+2][y] - Recall[BigO][6][x+2][y] )
+                               );
+                     
+                     L14= L14 + ((T23[BigO][x][y-2] - Recall[BigO][8][x][y-2] )
+                               - (T23[BigO][x][y-1] - Recall[BigO][8][x][y-1] )*8.
+                               + (T23[BigO][x][y+1] - Recall[BigO][8][x][y+1] )*8.
+                               - (T23[BigO][x][y+2] - Recall[BigO][8][x][y+2] )
+                               );
+                               
+                     L15= L15 + 2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
+/******************/
+/*                     
                      L0 = L0 + (T00[BigO][x][y] - Recall[BigO][0][x][y]);
                      L1 = L1 + (T01[BigO][x][y] - Recall[BigO][1][x][y]);
                      L2 = L2 + (T02[BigO][x][y] - Recall[BigO][2][x][y]);
@@ -7050,6 +7715,7 @@ xm[5] = 300;  ym[5] = 454;
                      L12 = L12 - (x-HALF)*h*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
                      
                      L13 = CSCharge[BigO][0];
+*/
                   }
                }
 
@@ -7071,20 +7737,21 @@ xm[5] = 300;  ym[5] = 454;
                }
 
                Hist[0][BigO] = L0;
-               Hist[1][BigO] = L1;
-               Hist[2][BigO] = L2;
+               Hist[1][BigO] = L1/(12.*h);
+               Hist[2][BigO] = L2/(12.*h);
                Hist[3][BigO] = L3;
                Hist[4][BigO] = L4;
-               Hist[5][BigO] = L5;
-               Hist[6][BigO] = L6;
+               Hist[5][BigO] = L5/(12.*h);
+               Hist[6][BigO] = L6/(12.*h);
                Hist[7][BigO] = L7;
                Hist[8][BigO] = L8;
-               Hist[9][BigO] = L9;
+               Hist[9][BigO] = L9/(12.*h);
                Hist[10][BigO] = L10/(12.*h);
-               Hist[11][BigO] = L11/(12.*h);
+               Hist[11][BigO] = L11;
                Hist[12][BigO] = L12;
-               Hist[13][BigO] = L13;
-               
+               Hist[13][BigO] = L13/(12.*h);
+               Hist[14][BigO] = L14/(12.*h);
+               Hist[15][BigO] = L15;
             }
 
 
@@ -7103,10 +7770,15 @@ Histogram[9] << (Hist[9][n]*h*h) << " ";
 Histogram[10] << (Hist[10][n]*h*h) << " ";
 Histogram[11] << (Hist[11][n]*h*h) << " ";
 Histogram[12] << (Hist[12][n]*h*h) << " ";
+/*
 //Histogram[13] << (Hist[13][n]*h*h) << " ";
 Histogram[13] << (CSCharge[n][0]*h*h) << " ";
 Histogram[14] << (CSCharge[n][1]*h*h) << " ";
 Histogram[15] << (CSCharge[n][2]*h*h) << " ";
+*/
+Histogram[13] << (Hist[13][n]*h*h) << " ";
+Histogram[14] << (Hist[14][n]*h*h) << " ";
+Histogram[15] << (Hist[15][n]*h*h) << " ";
 }
 Histogram[0] << endl;
 Histogram[1] << endl;
