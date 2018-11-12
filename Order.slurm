@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=Order
 #SBATCH --output=stdout.%j
-#SBATCH --account=122804261043
-#SBATCH --time=0:05:00
+#SBATCH --account=122804268621
+#SBATCH --time=14:00:00
 #SBATCH --ntasks=1
-#SBATCH --mem=4G
+#SBATCH --mem=12G
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zenthrelin@gmail.com
 top -b -u $USER > MemLogNTask1.%j &

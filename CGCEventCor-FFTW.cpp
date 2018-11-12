@@ -59,8 +59,11 @@ using namespace std;
 //    static double*** MuShape;
 //    static double Rho[2][NG][ARRAY][ARRAY]; //Fine charge density, only use for testing
 //    static double RhoCor[2][ARRAY][ARRAY];
-    double Hist[14][200];
+    double Hist[16][200];
+    double Ecc[2][200];
+    double EBHist[4][200];
     double CSCharge[200][3];
+    double EBsq[100][4];
     double RhoStep;
     double***** CovPot;
 //    static double CovPotChk[ARRAY][ARRAY];
@@ -120,7 +123,7 @@ using namespace std;
     static double*** T23;
     static double**** Recall;
     static double*** EBGrid;
-    static complex<double>*** AScale;
+//    static complex<double>*** AScale;
 
     complex<double>**** AT;
     complex<double>**** AS;
@@ -883,6 +886,7 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
             }
          }
       }
+      /*
       AScale = new complex<double>**[NG];
       for(int col=0; col<NG; col++)
       {
@@ -896,6 +900,7 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
             }
          }
       }
+      */
    }
 
    void RelA()
@@ -1514,9 +1519,28 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
     
     void NucSampler ()
     {
-       Nucl1 = NucGen(N1);//Nucleus 1
-       Nucl2 = NucGen(N2);//Nucleus 2
-       
+       Nucl1 = new double*[3];
+       for(int i=0;i<3;i++)
+       {
+          Nucl1[i] = new double[N1];
+          for(int n=0; n<N1; n++)
+          {
+             Nucl1[i][n] = 0;
+          }
+       }
+//       NucGen(N1, Nucl1);//Nucleus 1
+
+       Nucl2 = new double*[3];
+       for(int i=0;i<3;i++)
+       {
+          Nucl2[i] = new double[N2];
+          for(int n=0; n<N2; n++)
+          {
+             Nucl2[i][n] = 0;
+          }
+       }
+//       NucGen(N2,Nucl2);//Nucleus 2
+
        for(int x = 0; x<ARRAY; x++)
        {
            for(int y = 0; y<ARRAY; y++)
@@ -1934,7 +1958,9 @@ cout << "Fix 5" << endl;
        
 
 ofstream Histogram[16];
-
+ofstream EBHistogram[4];
+ofstream EccHist[2];
+/*
 Histogram[0].open("d0T00Hist.txt");
 Histogram[1].open("d1T01Hist.txt");
 Histogram[2].open("d2T02Hist.txt");
@@ -1954,7 +1980,7 @@ Histogram[12].open("d0T30Hist.txt");
 Histogram[13].open("d1T31Hist.txt");
 Histogram[14].open("d2T32Hist.txt");
 Histogram[15].open("d3T33Hist.txt");
-/*
+*/
 Histogram[0].open("T00Hist.txt");
 Histogram[1].open("T01Hist.txt");
 Histogram[2].open("T02Hist.txt");
@@ -1970,9 +1996,15 @@ Histogram[11].open("T22DerHist.txt");
 Histogram[12].open("L2Hist.txt");
 Histogram[13].open("CSCharge.txt");
 Histogram[14].open("CSChargeSquare.txt");
-Histogram[15].open("CSChargeAbs.txt");*/
+Histogram[15].open("CSChargeAbs.txt");
 
+EBHistogram[0].open("ELHist.txt");
+EBHistogram[1].open("BLHist.txt");
+EBHistogram[2].open("ETHist.txt");
+EBHistogram[3].open("BTHist.txt");
 
+EccHist[0].open("Ecc2.txt");
+EccHist[1].open("Ecc3.txt");
 
 
        for(int n=0; n<N; n++)
@@ -2115,25 +2147,6 @@ Histogram[15].open("CSChargeAbs.txt");*/
                }
            }//close y loop
        }//close x loop
-       
-       if((/*x==300 && y==444 &&*/ nuc==1 && eta > 6 /*&& col==7*/))
-       {
-          int x=300; int y=444;
-          cout << "eta " << eta << endl;
-          for(int col = 0; col<8; col++)
-          {
-          cout << RhoCG[nuc][col][eta][x][y] << "  ";
-          }
-          cout << endl;
-          
-          x=300; y=257;
-          cout << "eta " << eta << endl;
-          for(int col = 0; col<8; col++)
-          {
-          cout << RhoCG[nuc][col][eta][x][y] << "  ";
-          }
-          cout << endl;
-       }
 /*
 ifstream RhoRead[2];
 RhoRead[0].open("col0.txt");
@@ -3450,9 +3463,6 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
           cout << "Calculation A for N = " << n << endl;
           for(int nuc = 0; nuc<2; nuc++)
           {
-          ofstream SingleA[2];
-          SingleA[0].open("A22.txt");
-          SingleA[1].open("A12.txt");
           
           for(int x = 2; x<ARRAY-2; x++)
              {
@@ -3575,8 +3585,6 @@ cout << "N: " << n << " 's eta: " << eta  << "complete" << endl;
 
                          if(a==b && a==2)
                          {
-                            SingleA[0] << real(A[nuc][0][x][y][a][b]) << "  ";
-                            SingleA[1] << imag(A[nuc][1][x][y][a-1][b]) << "  ";
 
 /*                         if( (x==144 && y==215) || (x==54 && y==514) || (x==341 && y==300) || (x==98 && y==277) || (x==144 && y==215) || (x==300 && y==444) )
                          {
@@ -3761,7 +3769,7 @@ if(nuc==0 && y==300 && x==454)
 }
 */
 
-
+/*
                          if(x==256 && y==332)
                          {
                             if(a==2&&b==2 && nuc==0)
@@ -3816,6 +3824,7 @@ if(nuc==0 && y==300 && x==454)
 
 
                          }
+*/
 
 
 
@@ -3854,16 +3863,6 @@ if(nuc==0 && y==300 && x==454)
                                 */
 
                              }
-                             
-                                if(x==256 && y==332 && col==7)
-                                {
-                                   cout << "Color Print: " << dir << endl;
-                                   for(int cl=0; cl<8;cl++)
-                                   {
-                                   cout << color[dir][cl] << "  ";
-                                   }
-                                   cout << endl;
-                                }
                              
                              
                              
@@ -4092,8 +4091,6 @@ if(nuc==0 && x==300 && y==444 && nuc==0 && q==2 && r==2)
                    }
                 }// end y loop
 
-                SingleA[0] << endl;
-                SingleA[1] << endl;
 
              }
              
@@ -4162,7 +4159,7 @@ if(false)
                             color[dir][col]= color[dir][col] + (t[col][0][c]*di[c][0][dir] + t[col][1][c]*di[c][1][dir] + t[col][2][c]*di[c][2][dir])/2.;
                          }
                       }
-                      AScale[col][x][y] = -color[0][col]/color[1][col];
+                      // AScale[col][x][y] = -color[0][col]/color[1][col];
                    }
                 }
              }
@@ -4216,6 +4213,7 @@ if(false)
                          }
                       }
                    }
+                   /*
                    if(x==256 && y==332)
                    {
                       cout << "Color Fix Print: " << endl;
@@ -4232,6 +4230,7 @@ if(false)
                          }
                       cout << endl << endl;
                    }
+                   */
                 }
              }
 }
@@ -4240,7 +4239,7 @@ if(false)
 /***********/
 
 
-
+/*
              int xx=256; int yy=332;
              
              complex<double> di[4][3][3];
@@ -4272,6 +4271,7 @@ if(false)
                 }
              }
 
+/*
              complex<double> UTest[3][3];
              for(int a=0; a<3; a++)
              {
@@ -4298,7 +4298,7 @@ if(false)
              cout << endl;
 
 /**********************************************/
-
+/*
              for(int a=0; a<3; a++)
              {
                 for(int b=0; b<3; b++)
@@ -4343,7 +4343,7 @@ if(false)
              cout << endl;
              
 /**********************************************/
-
+/*
              for(int a=0; a<3; a++)
              {
                 for(int b=0; b<3; b++)
@@ -4404,7 +4404,7 @@ if(false)
              cout << endl;
 
 /**********************************************/
-
+/*
              for(int a=0; a<3; a++)
              {
                 for(int b=0; b<3; b++)
@@ -4470,7 +4470,7 @@ if(false)
              }
              cout << endl;
 /**********************************************/
-
+/*
              for(int a=0; a<3; a++)
              {
                 for(int b=0; b<3; b++)
@@ -4718,7 +4718,7 @@ xm[5] = 300;  ym[5] = 454;
              DeclAi();
 
              //Initialize Combined Field
-             
+/*             
              ofstream PrintAi[4];
              PrintAi[0].open("AxRe.txt");
              PrintAi[1].open("AxIm.txt");
@@ -4732,6 +4732,7 @@ xm[5] = 300;  ym[5] = 454;
              ofstream PrintFij[2];
              PrintFij[0].open("EzRe.txt");
              PrintFij[1].open("EzIm.txt");
+*/
 
              for(int x = 0; x<ARRAY; x++)
              {
@@ -4914,6 +4915,7 @@ xm[5] = 300;  ym[5] = 454;
                    }
 
 /*V Other B V*/
+/*
                    for(int a=0; a<3; a++)
                    {
                       for(int b=0; b<3; b++)
@@ -5129,6 +5131,7 @@ xm[5] = 300;  ym[5] = 454;
                          }
                       }
                    }
+*/
                 }
              }
              /*  eps ijDiDj B0 =?= 0
@@ -6141,7 +6144,7 @@ xm[5] = 300;  ym[5] = 454;
                 } // end x loop
 
 				/* CHECKS BY RJF */
-				
+/*				
 				cout << "Yang-Mills Tests" << endl << endl;
 				if(BigO==1)
 				{
@@ -6238,6 +6241,7 @@ xm[5] = 300;  ym[5] = 454;
 					cout << endl;
 					
 					/***/
+/*
 					cout << "dA check " << endl;
 					for(int a=0; a<3; a++)
 					{
@@ -6264,7 +6268,7 @@ xm[5] = 300;  ym[5] = 454;
 					}
 					cout << endl;
                     /***/
-					
+/*
 					cout << "n summed:" << endl;
 					
 					for(int a=0; a<3; a++)
@@ -6297,7 +6301,7 @@ xm[5] = 300;  ym[5] = 454;
 						cout << endl;
 					}
 					*/
-					
+/*
 					cout << endl << "nu = 1" << endl << endl;
 
                     for(int a=0; a<3; a++)
@@ -6410,7 +6414,7 @@ xm[5] = 300;  ym[5] = 454;
 					cout << endl;
 
 /*************/
-
+/*
 					cout << endl << "nu = 2" << endl << endl;
 					
                     for(int a=0; a<3; a++)
@@ -6523,7 +6527,7 @@ xm[5] = 300;  ym[5] = 454;
 					cout << endl;
 
 /*************/
-
+/*
 					cout << endl << "nu = 3" << endl << endl;
 					
                     for(int a=0; a<3; a++)
@@ -6677,6 +6681,7 @@ xm[5] = 300;  ym[5] = 454;
 
 
 				}
+*/
 
 				
 	}
@@ -7130,6 +7135,11 @@ xm[5] = 300;  ym[5] = 454;
                CSCharge[BigO][1] = 0;
                CSCharge[BigO][2] = 0;
                
+               EBsq[BigO][0] = 0;
+               EBsq[BigO][1] = 0;
+               EBsq[BigO][2] = 0;
+               EBsq[BigO][3] = 0;
+               
                double tempcharge;
 
                for(int x=2; x<ARRAY-2; x++)
@@ -7148,6 +7158,11 @@ xm[5] = 300;  ym[5] = 454;
                                
                               CSCharge[BigO][0] = CSCharge[BigO][0] + real(Fij[k][0][0][x][y][a][c]*Fij[l][1][0][x][y][c][a]
                                                                     )/2.;
+                              EBsq[BigO][0] = EBsq[BigO][0] + real(Fij[k][0][0][x][y][a][c]*Fij[l][0][0][x][y][c][a]
+                                                            )/2.;
+                              EBsq[BigO][1] = EBsq[BigO][1] + real(Fij[k][1][0][x][y][a][c]*Fij[l][1][0][x][y][c][a]
+                                                            )/2.;
+
                               tempcharge = tempcharge + real(Fij[k][0][0][x][y][a][c]*Fij[l][1][0][x][y][c][a]
                                                                     )/2.;
                               EBGrid[BigO][x][y] = EBGrid[BigO][x][y] + real(Fij[k][0][0][x][y][a][c]*Fij[l][1][0][x][y][c][a]
@@ -7161,18 +7176,23 @@ xm[5] = 300;  ym[5] = 454;
                               CSCharge[BigO][0] = CSCharge[BigO][0] + real(Fij[k][0][1][x][y][a][c]*Fij[l][1][1][x][y][c][a] +
                                                                      Fij[k][0][2][x][y][a][c]*Fij[l][1][2][x][y][c][a]
                                                                      )/2.;
+                              EBsq[BigO][2] = EBsq[BigO][2] + real(Fij[k][0][1][x][y][a][c]*Fij[l][0][1][x][y][c][a] +
+                                                              Fij[k][0][2][x][y][a][c]*Fij[l][0][2][x][y][c][a]
+                                                            )/2.;
+                              EBsq[BigO][3] = EBsq[BigO][3] + real(Fij[k][1][1][x][y][a][c]*Fij[l][1][1][x][y][c][a] +
+                                                              Fij[k][1][2][x][y][a][c]*Fij[l][1][2][x][y][c][a]
+                                                            )/2.;
                               tempcharge = tempcharge + real(Fij[k][0][1][x][y][a][c]*Fij[l][1][1][x][y][c][a] +
                                                                      Fij[k][0][2][x][y][a][c]*Fij[l][1][2][x][y][c][a]
                                                                      )/2.;
                               EBGrid[BigO][x][y] = EBGrid[BigO][x][y] + real(Fij[k][0][1][x][y][a][c]*Fij[l][1][1][x][y][c][a] +
                                                                      Fij[k][0][2][x][y][a][c]*Fij[l][1][2][x][y][c][a]
                                                                      )/2.;
-                                                                            
                            }
                         }
                      }
                      CSCharge[BigO][1] = CSCharge[BigO][1] + tempcharge*tempcharge;
-                     CSCharge[BigO][2] = CSCharge[BigO][1] + abs(tempcharge);
+                     CSCharge[BigO][2] = CSCharge[BigO][2] + abs(tempcharge);
                   }
                }
             }
@@ -7600,6 +7620,31 @@ xm[5] = 300;  ym[5] = 454;
              cout << "E's and B's Printed!" << endl;
 */
 
+
+
+
+            double L01=0;
+            double L02=0;
+            
+            double CMX = 0;
+            double CMY = 0;
+            double TE = 0;
+
+            //Need CoM to do Eccentricity
+            // COM IS CALCULATED IN THE GRID SPACE CONTINUUM! :D
+            for(int x=2+imp+Order/2+5; x<ARRAY-2-imp-Order/2-5; x++)
+            {
+               for(int y=2; y<ARRAY-2; y++)
+               {
+                  CMX = CMX + (x-HALF)*(T00[0][x][y] - Recall[0][0][x][y]);
+                  CMY = CMY + (y-HALF)*(T00[0][x][y] - Recall[0][0][x][y]);
+                  TE  = TE  + (T00[0][x][y] - Recall[0][0][x][y]);
+               }
+            }
+            
+            CMX = CMX/TE;
+            CMY = CMY/TE;
+
 //            for(int BigO=0; BigO<Order/2; BigO++)//ALTERNATE
             for(int BigO=0; BigO<=Order/2; BigO++)//Usual
             {
@@ -7619,11 +7664,24 @@ xm[5] = 300;  ym[5] = 454;
                double L13=0;
                double L14=0;
                double L15=0;
-
-               for(int x=2; x<ARRAY-2; x++)
+               double Ecc2[3];
+               double Ecc3[3];
+               
+               double EBEL = 0;
+               double EBBL = 0;
+               double EBET = 0;
+               double EBBT = 0;
+               
+               for(int x=0; x<3;x++)
+               {
+                  Ecc2[x] = 0.;
+                  Ecc3[x] = 0.;
+               }
+               for(int x=2+imp+Order/2+5; x<ARRAY-2-imp-Order/2-5; x++)
                {
                   for(int y=2; y<ARRAY-2; y++)
                   {
+/*
                      L0 = L0 + BigO*2*(T00[BigO][x][y] - Recall[BigO][0][x][y]);
 
                      L1 = L1 + ((T01[BigO][x-2][y] - Recall[BigO][1][x-2][y] )
@@ -7640,6 +7698,7 @@ xm[5] = 300;  ym[5] = 454;
                                
                      L3 = L3 + (T00[BigO][x][y] - Recall[BigO][0][x][y]) + (T33[BigO][x][y] - Recall[BigO][9][x][y]);
 /******************/
+/*
                      L4 = L4 + (BigO*2-1)*(T01[BigO][x][y] - Recall[BigO][1][x][y]);
 
                      L5 = L5 + ((T11[BigO][x-2][y] - Recall[BigO][4][x-2][y] )
@@ -7656,6 +7715,7 @@ xm[5] = 300;  ym[5] = 454;
                                
                      L7 = L7 + (T01[BigO][x][y] - Recall[BigO][1][x][y]);
 /******************/
+/*
                      L8 = L8 + (BigO*2-1)*(T02[BigO][x][y] - Recall[BigO][2][x][y]);
 
                      L9 = L9 + ((T12[BigO][x-2][y] - Recall[BigO][5][x-2][y] )
@@ -7672,6 +7732,7 @@ xm[5] = 300;  ym[5] = 454;
                                
                      L11= L11 + (T02[BigO][x][y] - Recall[BigO][2][x][y]);
 /******************/
+/*
                      L12= L12 + BigO*2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
 
                      L13= L13 + ((T13[BigO][x-2][y] - Recall[BigO][6][x-2][y] )
@@ -7688,7 +7749,14 @@ xm[5] = 300;  ym[5] = 454;
                                
                      L15= L15 + 2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
 /******************/
-/*                     
+                     if( abs(x-HALF) < 11 && abs(y-HALF) < 11 && BigO==0)
+                     {
+                        L02 = L02 + (T00[BigO][x][y] - Recall[BigO][0][x][y])/441;
+                     }
+                     if(x==HALF && y==HALF && BigO==0)
+                     {
+                        L01 = (T00[BigO][HALF][HALF] - Recall[BigO][0][HALF][HALF]);
+                     }
                      L0 = L0 + (T00[BigO][x][y] - Recall[BigO][0][x][y]);
                      L1 = L1 + (T01[BigO][x][y] - Recall[BigO][1][x][y]);
                      L2 = L2 + (T02[BigO][x][y] - Recall[BigO][2][x][y]);
@@ -7715,7 +7783,33 @@ xm[5] = 300;  ym[5] = 454;
                      L12 = L12 - (x-HALF)*h*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
                      
                      L13 = CSCharge[BigO][0];
+                     
+                     EBEL = EBsq[BigO][0];
+                     
+                     EBBL = EBsq[BigO][1];
+                     
+                     EBET = EBsq[BigO][2];
+                     
+                     EBBT = EBsq[BigO][3];
+                     
+                     double rd = sqrt((x-CMX)*(x-CMX)*1. + (y-CMY)*(y-CMY)*1.)*h;
+                     
+                     if(rd != 0)
+                     {
+                        double tht = atan2((y-CMY)*h,(x-CMX)*h);
+/*                        
+                        Ecc2 = Ecc2 + (T00[BigO][x][y] - Recall[BigO][0][x][y])*sqrt( pow(rd*rd*cos(2*tht),2.0) + pow(rd*rd*sin(2*tht),2.0) )/pow(rd,2.0);
+                        Ecc3 = Ecc3 + (T00[BigO][x][y] - Recall[BigO][0][x][y])*sqrt( pow(rd*rd*rd*cos(3*tht),2.0) + pow(rd*rd*rd*sin(3*tht),2.0) )/pow(rd,3.0);
 */
+                        /**Idiot Fix**/
+                        Ecc2[0] = Ecc2[0] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd;
+                        Ecc2[1] = Ecc2[1] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*cos(2.*tht);
+                        Ecc2[2] = Ecc2[2] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*sin(2.*tht);
+                        
+                        Ecc3[0] = Ecc3[0] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*rd;
+                        Ecc3[1] = Ecc3[1] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*rd*cos(3.*tht);
+                        Ecc3[2] = Ecc3[2] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*rd*sin(3.*tht);
+                     }
                   }
                }
 
@@ -7737,48 +7831,66 @@ xm[5] = 300;  ym[5] = 454;
                }
 
                Hist[0][BigO] = L0;
-               Hist[1][BigO] = L1/(12.*h);
-               Hist[2][BigO] = L2/(12.*h);
+               Hist[1][BigO] = L1;
+               Hist[2][BigO] = L2;
                Hist[3][BigO] = L3;
                Hist[4][BigO] = L4;
-               Hist[5][BigO] = L5/(12.*h);
-               Hist[6][BigO] = L6/(12.*h);
+               Hist[5][BigO] = L5;
+               Hist[6][BigO] = L6;
                Hist[7][BigO] = L7;
                Hist[8][BigO] = L8;
-               Hist[9][BigO] = L9/(12.*h);
+               Hist[9][BigO] = L9;
                Hist[10][BigO] = L10/(12.*h);
-               Hist[11][BigO] = L11;
+               Hist[11][BigO] = L11/(12.*h);
                Hist[12][BigO] = L12;
-               Hist[13][BigO] = L13/(12.*h);
-               Hist[14][BigO] = L14/(12.*h);
-               Hist[15][BigO] = L15;
+               Hist[13][BigO] = L13;
+               
+               EBHist[0][BigO] = EBEL;
+               EBHist[1][BigO] = EBBL;
+               EBHist[2][BigO] = EBET;
+               EBHist[3][BigO] = EBBT;
+                              
+               Ecc[0][BigO] = sqrt(Ecc2[1]*Ecc2[1] + Ecc2[2]*Ecc2[2])/Ecc2[0];
+               Ecc[1][BigO] = sqrt(Ecc3[1]*Ecc3[1] + Ecc3[2]*Ecc3[2])/Ecc3[0];
+               
+/*               Hist[14][BigO] = L14;
+               Hist[15][BigO] = L15;*/
             }
 
 
-for(int n=0; n<=Order/2; n++)
+for(int BigO=0; BigO<=Order/2; BigO++)
 {
-Histogram[0] << (Hist[0][n]*h*h) << " ";
-Histogram[1] << (Hist[1][n]*h*h) << " ";
-Histogram[2] << (Hist[2][n]*h*h) << " ";
-Histogram[3] << (Hist[3][n]*h*h) << " ";
-Histogram[4] << (Hist[4][n]*h*h) << " ";
-Histogram[5] << (Hist[5][n]*h*h) << " ";
-Histogram[6] << (Hist[6][n]*h*h) << " ";
-Histogram[7] << (Hist[7][n]*h*h) << " ";
-Histogram[8] << (Hist[8][n]*h*h) << " ";
-Histogram[9] << (Hist[9][n]*h*h) << " ";
-Histogram[10] << (Hist[10][n]*h*h) << " ";
-Histogram[11] << (Hist[11][n]*h*h) << " ";
-Histogram[12] << (Hist[12][n]*h*h) << " ";
+Histogram[0] << (Hist[0][BigO]*h*h) << " " << L01 << "  " << L02 << "  ";
+Histogram[1] << (Hist[1][BigO]*h*h) << " ";
+Histogram[2] << (Hist[2][BigO]*h*h) << " ";
+Histogram[3] << (Hist[3][BigO]*h*h) << " ";
+Histogram[4] << (Hist[4][BigO]*h*h) << " ";
+Histogram[5] << (Hist[5][BigO]*h*h) << " ";
+Histogram[6] << (Hist[6][BigO]*h*h) << " ";
+Histogram[7] << (Hist[7][BigO]*h*h) << " ";
+Histogram[8] << (Hist[8][BigO]*h*h) << " ";
+Histogram[9] << (Hist[9][BigO]*h*h) << " ";
+Histogram[10] << (Hist[10][BigO]*h*h) << " ";
+Histogram[11] << (Hist[11][BigO]*h*h) << " ";
+Histogram[12] << (Hist[12][BigO]*h*h) << " ";
 /*
-//Histogram[13] << (Hist[13][n]*h*h) << " ";
-Histogram[13] << (CSCharge[n][0]*h*h) << " ";
-Histogram[14] << (CSCharge[n][1]*h*h) << " ";
-Histogram[15] << (CSCharge[n][2]*h*h) << " ";
+//Histogram[13] << (Hist[13][BigO]*h*h) << " ";
+Histogram[13] << (CSCharge[BigO][0]*h*h) << " ";
+Histogram[14] << (CSCharge[BigO][1]*h*h) << " ";
+Histogram[15] << (CSCharge[BigO][2]*h*h) << " ";
 */
-Histogram[13] << (Hist[13][n]*h*h) << " ";
-Histogram[14] << (Hist[14][n]*h*h) << " ";
-Histogram[15] << (Hist[15][n]*h*h) << " ";
+Histogram[13] << (Hist[13][BigO]*h*h) << " ";
+Histogram[14] << (Hist[14][BigO]*h*h) << " ";
+Histogram[15] << (Hist[15][BigO]*h*h) << " ";
+
+EBHistogram[0] << (EBHist[0][BigO]*h*h) << "  ";
+EBHistogram[1] << (EBHist[1][BigO]*h*h) << "  ";
+EBHistogram[2] << (EBHist[2][BigO]*h*h) << "  ";
+EBHistogram[3] << (EBHist[3][BigO]*h*h) << "  ";
+
+
+EccHist[0] << (Ecc[0][BigO]) << "  ";
+EccHist[1] << (Ecc[1][BigO]) << "  ";
 }
 Histogram[0] << endl;
 Histogram[1] << endl;
@@ -7796,6 +7908,26 @@ Histogram[12] << endl;
 Histogram[13] << endl;
 Histogram[14] << endl;
 Histogram[15] << endl;
+
+EBHistogram[0] << endl;
+EBHistogram[1] << endl;
+EBHistogram[2] << endl;
+EBHistogram[3] << endl;
+
+EccHist[0] << endl;
+EccHist[1] << endl;
+
+
+if(NucMethod == 1)
+{
+   for(int i=0; i<3; i++)
+   {
+      delete [] Nucl1[i];
+      delete [] Nucl2[i];
+   }
+   delete [] Nucl1;
+   delete [] Nucl2;
+}
 
             } //CLOSES N ITERATIONS
             
@@ -7815,6 +7947,14 @@ Histogram[12].close();
 Histogram[13].close();
 Histogram[14].close();
 Histogram[15].close();
+
+EBHistogram[0].close();
+EBHistogram[1].close();
+EBHistogram[2].close();
+EBHistogram[3].close();
+
+EccHist[0].close();
+EccHist[1].close();
 
 /*
        ofstream PrintRh[4];

@@ -114,16 +114,21 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
          else return temp;
       }
 
-      double** NucGen(int NN)
+      void NucGen(int NN, double** cartisan)
       {
           double ran_sample_r[NN],r_sample[NN],theta_sample[NN],phi_sample[NN];
           
-          double** cartisan=0;
+/*          double** cartisan;
           cartisan = new double*[3];
           for(int i=0;i<3;i++)
           {
              cartisan[i] = new double[NN];
+             for(int n=0; n<NN; n++)
+             {
+             cartisan[i][NN] = 0;
+             }
           }
+*/
 
           //srand(time(0));          
           ifstream CDFRead;
@@ -167,17 +172,17 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
           {
              Succ=true; //Well it is true so far! By default we will escape the loop.
              
-             for(int i=0; i<NN;i++)
+             for(int i=0; i<NN;i++) // Sample random # from 0 ->1
              {
-                val1=rann();
-                ran_sample_r[i]=val1;
+                val1=rann(); //Rand #
+                ran_sample_r[i]=val1; //Rand # Array
              }
 
              cout << "****************************" << endl;
           
-             for(int n=0; n<NN;n++)
+             for(int n=0; n<NN;n++) //Turn sampled # into sampled radius
              {
-                for(int i=0; i<8192;i++)
+                for(int i=0; i<8192;i++) //Abs Diff between each CDF point and sampled val- will want to find where 0 is
                 {
                    temp[i]=abs(ran_sample_r[n]-cdf_au[1][i]);
                 }
@@ -187,24 +192,24 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
                 double min=temp[0];
                 for(int j=1; j<8192; j++)
                 {
-                   if(min>temp[j]) //never triggers
+                   if(min>temp[j]) //Find smallest deviation from tabulated CDF
                    {
                       i_sort = j;
                       min=temp[j];
                    }
                 }
 
-                if( (ran_sample_r[n]-cdf_au[1][i_sort]) >0 ) //always triggers
+                if( (ran_sample_r[n]-cdf_au[1][i_sort]) >0 ) //Are we above or below at min diff?
                 {
                    i_sign=1.0;
                 }
 
-                else // triggers reliably on i=197->200 ?!
+                else
                 {
                    i_sign=-1.0;
                 }
 
-                if(i_sign<0)
+                if(i_sign<0) //Interpolate radius for placement
                 {
                    r_sample[n]=2.E-3*i_sort+2.E-3*(ran_sample_r[n]-cdf_au[1][i_sort-1])/(cdf_au[1][i_sort]-cdf_au[1][i_sort-1]);
                 }
@@ -212,11 +217,7 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
                 {
                    r_sample[n]=2.E-3*i_sort+2.E-3*temp[i_sort]/(cdf_au[1][i_sort+1]-cdf_au[1][i_sort]);
                 }
-             }
-
-//test          cout << "trashval" << endl;
-//test          double trashval;
-//test          cin >> trashval;
+             } // All nucleons are given a radius
 
              hpsort(NN,r_sample);
 
@@ -253,11 +254,6 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
              for(int i=1;i<NN;i++)
              {
                 cout << "i_fail: " << i_fail << endl;
-                if(i_fail>14)
-                {
-                   Succ=false; //Do NOT escape the Succ loop!
-                   i=2*NN; // Escape the i loop
-                }
                 
                 i_fail=0;
 
@@ -288,17 +284,25 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
                    
                          if(r_sim < r_core)
                          {
-                            i_fail=i_fail+1;
-                            cout << "nucleon index = " << i << endl;
-                            cout << "i_fail = " << i_fail;
+                            i_fail=i_fail+1; // Count Fails
+//                            cout << "nucleon index = " << i << endl;
+//                            cout << "i_fail = " << i_fail;
                          }
                          else{Nuc=true;}
                       }
                       else{Nuc=true;}
                    }
+                   if(i_fail==20)
+                   {
+                      Nuc=true; //Will escape Nuc Loop in shame
+                      i=2*NN; // Escape the i loop, don't bother placing more nuclei
+                      Succ=false; //Do NOT escape the Succ loop! Restart the process with radii sampling
+                   }
                 }//While Nuc
              }//i loop
+             cout << "Succ While" << endl;
           }//while succ
+          cout << "Succ!" << endl;
 
           ofstream SampleWrite;
           if(Atom==1)
@@ -333,6 +337,4 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
           }
           
           BubbleWrite.close();
-
-          return cartisan;
       } 
