@@ -36,6 +36,7 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
 	     float rra;
 
 	     if (n < 2) return;
+	     --ra; //The Fix ^TM
 	     l=(n >> 1)+1;
 	     ir=n;
 	     for (;;) 
@@ -300,9 +301,7 @@ double rann() {std::uniform_real_distribution<double> uniran(0.0,1.0); return un
                    }
                 }//While Nuc
              }//i loop
-             cout << "Succ While" << endl;
           }//while succ
-          cout << "Succ!" << endl;
 
           ofstream SampleWrite;
           if(Atom==1)

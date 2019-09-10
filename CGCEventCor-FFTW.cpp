@@ -53,6 +53,7 @@ using namespace std;
     
     double***** RhoCG;
 
+    int size = 200;
     int Target = 1;
     static double CDFTab[NUMSTEP][2];
     static double MuShape[2][ARRAY][ARRAY];
@@ -78,7 +79,7 @@ using namespace std;
 //    static double AlphaAv[2][ARRAY][ARRAY];
       static complex<double>*** AxCor;
       static complex<double>*** AyCor;
-      static double*** MuShapeCenter;
+      static double**** MuShapeCenter;
 //    static complex<double> AxAv[2][ARRAY][ARRAY];
 //    static complex<double> AyAv[2][ARRAY][ARRAY];
 //    static complex<double> E0Cor[2][ARRAY][ARRAY];
@@ -118,6 +119,7 @@ using namespace std;
     static double*** T01;
     static double*** T02;
     static double*** T03;
+    static double*** T03FT;
     static double*** T12;
     static double*** T13;
     static double*** T23;
@@ -131,6 +133,14 @@ using namespace std;
     complex<double>***** AvU;
     
     static complex<double> Bx[3][3][3];
+    
+    double CollDens;
+    double PartDens;
+    double NColl;
+    double NPart;
+    int NCollGeo;
+    int NPartGeo;
+    ofstream GlauberGeo;
 
 std::mt19937_64 eng(std::random_device{}());
 //std::mt19937_64 eng(145709713); // run with set seed: 145709713
@@ -690,16 +700,21 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
     /*FFFFFFFFFFFUUUUUUUUUUUUU*/
    void DeclDelMe()
    {
-      MuShapeCenter = new double**[2];
+        
+      MuShapeCenter = new double***[2];
       for(int nuc=0; nuc<2; nuc++)
       {
-         MuShapeCenter[nuc] = new double*[ARRAY];
-         for(int x=0; x<ARRAY; x++)
+         MuShapeCenter[nuc] = new double**[2];
+         for(int kind=0; kind<2; kind++)
          {
-            MuShapeCenter[nuc][x] = new double[ARRAY];
-            for(int y=0; y<ARRAY; y++)
+            MuShapeCenter[nuc][kind] = new double*[ARRAY];
+            for(int x=0; x<ARRAY; x++)
             {
-               MuShapeCenter[nuc][x][y] = 0;
+               MuShapeCenter[nuc][kind][x] = new double[ARRAY];
+               for(int y=0; y<ARRAY; y++)
+               {
+                  MuShapeCenter[nuc][kind][x][y] = 0;
+               }
             }
          }
       }
@@ -1256,6 +1271,23 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
          }
       }
 
+      T03FT = new double**[2];
+
+      for(int BigO=0; BigO<=1; BigO++)
+      {
+         T03FT[BigO] = new double*[(2*size+1)];
+
+         for(int x=0; x<(2*size+1); x++)
+         {
+            T03FT[BigO][x] = new double[(2*size+1)];
+
+            for(int y=0; y<(2*size+1); y++)
+            {
+               T03FT[BigO][x][y] = 0;
+            }
+         }
+      }
+
       Recall = new double*** [(Order/2)+1];
       for(int BigO=0; BigO<=(Order/2); BigO++)
       {
@@ -1528,7 +1560,7 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
              Nucl1[i][n] = 0;
           }
        }
-//       NucGen(N1, Nucl1);//Nucleus 1
+       NucGen(N1, Nucl1);//Nucleus 1
 
        Nucl2 = new double*[3];
        for(int i=0;i<3;i++)
@@ -1539,7 +1571,7 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
              Nucl2[i][n] = 0;
           }
        }
-//       NucGen(N2,Nucl2);//Nucleus 2
+       NucGen(N2,Nucl2);//Nucleus 2
 
        for(int x = 0; x<ARRAY; x++)
        {
@@ -1564,12 +1596,52 @@ void array_check(int buffer, cplx arr_1[ARRAY][ARRAY][4][4], cplx arr_2[ARRAY][A
                                                             )/(2*gauss_n) );
               }
               
-              MuShape[0][x][y]=NucScale*Shape0;
-              MuShape[1][x][y]=NucScale*Shape1;
+              MuShape[0][x][y]=Shape0;
+              MuShape[1][x][y]=Shape1;
               
-              MuShapeCenter[0][x][y] = MuShapeCenter[0][x][y] + MuShape[0][x][y];
-              MuShapeCenter[1][x][y] = MuShapeCenter[1][x][y] + MuShape[1][x][y];
+              MuShapeCenter[0][0][x][y] = MuShapeCenter[0][0][x][y] + MuShape[0][x][y];
+              MuShapeCenter[1][0][x][y] = MuShapeCenter[1][0][x][y] + MuShape[1][x][y];
            }
+       }
+
+       NCollGeo=0;
+       int Part[2][N1] = {0};
+       for(int z=0; z<N1; z++)
+       {
+          for(int z2=0; z2 <N2; z2++)
+          {
+             if( (Nucl1[0][z] - Nucl2[0][z2])*(Nucl1[0][z] - Nucl2[0][z2]) + (Nucl1[1][z] - Nucl2[1][z2])*(Nucl1[1][z] - Nucl2[1][z2]) <= 1.5*1.5 )
+             {
+                NCollGeo++;
+                
+                Part[0][z] = 1; Part[1][z2]=1;
+             }
+          }
+       }
+       
+       NPartGeo=0;
+       for(int z=0; z<N1; z++)
+       {
+          NPartGeo = NPartGeo + Part[0][z] + Part[1][z];
+       }
+       
+       GlauberGeo << NPartGeo << "  " << NCollGeo << endl;
+              
+       for(int x=2+imp+5; x<ARRAY-2-imp-5; x++)
+       {
+          for(int y=2; y<ARRAY-2; y++)
+          {
+             MuShapeCenter[0][1][x][y] = MuShapeCenter[0][1][x][y] + MuShape[0][x-imp][y]*MuShape[1][x+imp][y];
+             MuShapeCenter[1][1][x][y] = MuShapeCenter[1][1][x][y] +
+                                         MuShape[1][x+imp][y]*
+                                         (
+                                            MuShape[0][x-imp-2][y]
+                                          - MuShape[0][x-imp-1][y]*8
+                                          + MuShape[0][x-imp+1][y]*8
+                                          - MuShape[0][x-imp+2][y]
+                                         )/(12*h);
+                                         
+          }
        }
     }
 
@@ -1960,6 +2032,10 @@ cout << "Fix 5" << endl;
 ofstream Histogram[16];
 ofstream EBHistogram[4];
 ofstream EccHist[2];
+
+ofstream PeakHist[2];
+
+ofstream GlaubOut;
 /*
 Histogram[0].open("d0T00Hist.txt");
 Histogram[1].open("d1T01Hist.txt");
@@ -2006,6 +2082,11 @@ EBHistogram[3].open("BTHist.txt");
 EccHist[0].open("Ecc2.txt");
 EccHist[1].open("Ecc3.txt");
 
+PeakHist[0].open("MonopointEnergy.txt");
+PeakHist[1].open("MultipointEnergy.txt");
+
+GlaubOut.open("GlauberInfo.txt");
+GlauberGeo.open("GlauberInfoGeo.txt");
 
        for(int n=0; n<N; n++)
        {
@@ -2054,6 +2135,26 @@ EccHist[1].open("Ecc3.txt");
           }
           }
        }
+       
+
+       NColl = 0;
+       NPart = 0;
+//       for(int x=0;x<ARRAY;x++)
+       for(int x=imp; x<ARRAY-imp; x++)
+       {
+       for(int y=0;y<ARRAY;y++) // Calc at x,y
+       {
+       CollDens = XSect*MuShape[0][x-imp][y]*MuShape[1][x+imp][y];
+
+       PartDens = MuShape[0][x-imp][y]*(1-pow(1-MuShape[1][x+imp][y]*XSect/N2,N2))
+                + MuShape[1][x+imp][y]*(1-pow(1-MuShape[0][x-imp][y]*XSect/N1,N1));
+            
+       NColl = NColl + CollDens;
+       NPart = NPart + PartDens;
+       }
+       }
+       
+       GlaubOut << NPart*h*h << "  " << NColl*h*h << endl;
 
        DeclCovPot();
 
@@ -2142,7 +2243,15 @@ EccHist[1].open("Ecc3.txt");
                    }
                    //Scale by Sqrt(mu) to scale strength
                    //Scale by hCG to account for coarse graining (1/hCG) and include summation element for sum in alpha (hCG*hCG)
+                   //
+                   if(NucMethod == 1)
+                   {
+                   RhoCG[nuc][col][eta][x][y] = RhoCG[nuc][col][eta][x][y]*sqrt(NucScale*MuShape[nuc][x][y])*g*h;
+                   }
+                   else
+                   {
                    RhoCG[nuc][col][eta][x][y] = RhoCG[nuc][col][eta][x][y]*sqrt(MuShape[nuc][x][y])*g*h;
+                   }
 //                   RhoCG[nuc][col][eta][ARRAY-1-x][y] = -RhoCG[nuc][col][eta][x][y];
                }
            }//close y loop
@@ -7622,9 +7731,13 @@ xm[5] = 300;  ym[5] = 454;
 
 
 
-
-            double L01=0;
-            double L02=0;
+            double CenterT00[2][Order/2 + 1];
+            
+            for(int BigO=0; BigO<=Order/2; BigO++)//Usual
+            {
+               CenterT00[0][BigO] = 0;
+               CenterT00[1][BigO] = 0;
+            }
             
             double CMX = 0;
             double CMY = 0;
@@ -7634,7 +7747,7 @@ xm[5] = 300;  ym[5] = 454;
             // COM IS CALCULATED IN THE GRID SPACE CONTINUUM! :D
             for(int x=2+imp+Order/2+5; x<ARRAY-2-imp-Order/2-5; x++)
             {
-               for(int y=2; y<ARRAY-2; y++)
+               for(int y=2+Order/2+5; y<ARRAY-2-Order/2-5; y++)
                {
                   CMX = CMX + (x-HALF)*(T00[0][x][y] - Recall[0][0][x][y]);
                   CMY = CMY + (y-HALF)*(T00[0][x][y] - Recall[0][0][x][y]);
@@ -7644,6 +7757,8 @@ xm[5] = 300;  ym[5] = 454;
             
             CMX = CMX/TE;
             CMY = CMY/TE;
+            double Ecc2[3];
+               double Ecc3[3];
 
 //            for(int BigO=0; BigO<Order/2; BigO++)//ALTERNATE
             for(int BigO=0; BigO<=Order/2; BigO++)//Usual
@@ -7664,8 +7779,10 @@ xm[5] = 300;  ym[5] = 454;
                double L13=0;
                double L14=0;
                double L15=0;
-               double Ecc2[3];
-               double Ecc3[3];
+
+               double L01=0;
+               double L02=0;
+               ////
                
                double EBEL = 0;
                double EBBL = 0;
@@ -7679,81 +7796,14 @@ xm[5] = 300;  ym[5] = 454;
                }
                for(int x=2+imp+Order/2+5; x<ARRAY-2-imp-Order/2-5; x++)
                {
-                  for(int y=2; y<ARRAY-2; y++)
+                  for(int y=2+Order/2+5; y<ARRAY-2-Order/2-5; y++)
                   {
-/*
-                     L0 = L0 + BigO*2*(T00[BigO][x][y] - Recall[BigO][0][x][y]);
 
-                     L1 = L1 + ((T01[BigO][x-2][y] - Recall[BigO][1][x-2][y] )
-                              - (T01[BigO][x-1][y] - Recall[BigO][1][x-1][y] )*8.
-                              + (T01[BigO][x+1][y] - Recall[BigO][1][x+1][y] )*8.
-                              - (T01[BigO][x+2][y] - Recall[BigO][1][x+2][y] )
-                               );
-                     
-                     L2 = L2 + ((T02[BigO][x][y-2] - Recall[BigO][2][x][y-2] )
-                              - (T02[BigO][x][y-1] - Recall[BigO][2][x][y-1] )*8.
-                              + (T02[BigO][x][y+1] - Recall[BigO][2][x][y+1] )*8.
-                              - (T02[BigO][x][y+2] - Recall[BigO][2][x][y+2] )
-                               );
-                               
-                     L3 = L3 + (T00[BigO][x][y] - Recall[BigO][0][x][y]) + (T33[BigO][x][y] - Recall[BigO][9][x][y]);
-/******************/
-/*
-                     L4 = L4 + (BigO*2-1)*(T01[BigO][x][y] - Recall[BigO][1][x][y]);
-
-                     L5 = L5 + ((T11[BigO][x-2][y] - Recall[BigO][4][x-2][y] )
-                              - (T11[BigO][x-1][y] - Recall[BigO][4][x-1][y] )*8.
-                              + (T11[BigO][x+1][y] - Recall[BigO][4][x+1][y] )*8.
-                              - (T11[BigO][x+2][y] - Recall[BigO][4][x+2][y] )
-                               );
-                     
-                     L6 = L6 + ((T12[BigO][x][y-2] - Recall[BigO][5][x][y-2] )
-                              - (T12[BigO][x][y-1] - Recall[BigO][5][x][y-1] )*8.
-                              + (T12[BigO][x][y+1] - Recall[BigO][5][x][y+1] )*8.
-                              - (T12[BigO][x][y+2] - Recall[BigO][5][x][y+2] )
-                               );
-                               
-                     L7 = L7 + (T01[BigO][x][y] - Recall[BigO][1][x][y]);
-/******************/
-/*
-                     L8 = L8 + (BigO*2-1)*(T02[BigO][x][y] - Recall[BigO][2][x][y]);
-
-                     L9 = L9 + ((T12[BigO][x-2][y] - Recall[BigO][5][x-2][y] )
-                              - (T12[BigO][x-1][y] - Recall[BigO][5][x-1][y] )*8.
-                              + (T12[BigO][x+1][y] - Recall[BigO][5][x+1][y] )*8.
-                              - (T12[BigO][x+2][y] - Recall[BigO][5][x+2][y] )
-                               );
-                     
-                     L10= L10 + ((T22[BigO][x][y-2] - Recall[BigO][7][x][y-2] )
-                               - (T22[BigO][x][y-1] - Recall[BigO][7][x][y-1] )*8.
-                               + (T22[BigO][x][y+1] - Recall[BigO][7][x][y+1] )*8.
-                               - (T22[BigO][x][y+2] - Recall[BigO][7][x][y+2] )
-                               );
-                               
-                     L11= L11 + (T02[BigO][x][y] - Recall[BigO][2][x][y]);
-/******************/
-/*
-                     L12= L12 + BigO*2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
-
-                     L13= L13 + ((T13[BigO][x-2][y] - Recall[BigO][6][x-2][y] )
-                               - (T13[BigO][x-1][y] - Recall[BigO][6][x-1][y] )*8.
-                               + (T13[BigO][x+1][y] - Recall[BigO][6][x+1][y] )*8.
-                               - (T13[BigO][x+2][y] - Recall[BigO][6][x+2][y] )
-                               );
-                     
-                     L14= L14 + ((T23[BigO][x][y-2] - Recall[BigO][8][x][y-2] )
-                               - (T23[BigO][x][y-1] - Recall[BigO][8][x][y-1] )*8.
-                               + (T23[BigO][x][y+1] - Recall[BigO][8][x][y+1] )*8.
-                               - (T23[BigO][x][y+2] - Recall[BigO][8][x][y+2] )
-                               );
-                               
-                     L15= L15 + 2*(T03[BigO][x][y] - Recall[BigO][3][x][y]);
-/******************/
-                     if( abs(x-HALF) < 11 && abs(y-HALF) < 11 && BigO==0)
+                     if( abs(x-HALF) < 11 && abs(y-HALF) < 11 )
                      {
                         L02 = L02 + (T00[BigO][x][y] - Recall[BigO][0][x][y])/441;
                      }
-                     if(x==HALF && y==HALF && BigO==0)
+                     if( x==HALF && y==HALF )
                      {
                         L01 = (T00[BigO][HALF][HALF] - Recall[BigO][0][HALF][HALF]);
                      }
@@ -7792,11 +7842,11 @@ xm[5] = 300;  ym[5] = 454;
                      
                      EBBT = EBsq[BigO][3];
                      
-                     double rd = sqrt((x-CMX)*(x-CMX)*1. + (y-CMY)*(y-CMY)*1.)*h;
+                     double rd = sqrt((x-HALF-CMX)*(x-HALF-CMX)*1. + (y-HALF-CMY)*(y-HALF-CMY)*1.)*h;
                      
                      if(rd != 0)
                      {
-                        double tht = atan2((y-CMY)*h,(x-CMX)*h);
+                        double tht = atan2((y-HALF-CMY)*h,(x-HALF-CMX)*h);
 /*                        
                         Ecc2 = Ecc2 + (T00[BigO][x][y] - Recall[BigO][0][x][y])*sqrt( pow(rd*rd*cos(2*tht),2.0) + pow(rd*rd*sin(2*tht),2.0) )/pow(rd,2.0);
                         Ecc3 = Ecc3 + (T00[BigO][x][y] - Recall[BigO][0][x][y])*sqrt( pow(rd*rd*rd*cos(3*tht),2.0) + pow(rd*rd*rd*sin(3*tht),2.0) )/pow(rd,3.0);
@@ -7811,6 +7861,40 @@ xm[5] = 300;  ym[5] = 454;
                         Ecc3[2] = Ecc3[2] + (T00[BigO][x][y] - Recall[BigO][0][x][y])*rd*rd*rd*sin(3.*tht);
                      }
                   }
+               }
+               if(BigO==1)
+               {
+                  fftw_complex *T03Trans; //Will contain rho(x), rho(k), alpha(k), alpha(x)
+                  fftw_plan p2;
+
+                  T03Trans = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (2*size+1)*(2*size+1)); // what the fuck is the 1d bullshit...
+
+
+                  for(int i=0; i<2*size+1; i++)
+                  {
+                     for(int j=0; j<2*size+1; j++)
+                     {
+                        T03Trans[i*(2*size+1) + j][0] = T03[0][HALF-size+i][HALF-size+j]; //rho(x)
+                        T03Trans[i*(2*size+1) + j][1] = 0;
+                     }
+                  }
+
+                  p2 = fftw_plan_dft_2d((2*size+1), (2*size+1), T03Trans, T03Trans, FFTW_FORWARD, FFTW_ESTIMATE);
+
+                  fftw_execute(p2); //rhoalpha -> rho(k)
+
+                  for(int i=0; i<(2*size+1); i++)
+                  {
+                     for(int j=0; j<(2*size+1); j++)
+                     {
+                        T03FT[0][i][j] = T03FT[0][i][j] + T03Trans[i*(2*size+1) + j][0]*T03Trans[i*(2*size+1) + j][0];
+                        T03FT[1][i][j] = T03FT[1][i][j] + T03Trans[i*(2*size+1) + j][1]*T03Trans[i*(2*size+1) + j][1];
+                     }
+                  }
+
+                  fftw_free(T03Trans);
+          
+                  fftw_destroy_plan(p2);
                }
 
                for(int x=0; x<ARRAY; x++)
@@ -7844,6 +7928,9 @@ xm[5] = 300;  ym[5] = 454;
                Hist[11][BigO] = L11/(12.*h);
                Hist[12][BigO] = L12;
                Hist[13][BigO] = L13;
+
+               CenterT00[0][BigO] = L01;
+               CenterT00[1][BigO] = L02;
                
                EBHist[0][BigO] = EBEL;
                EBHist[1][BigO] = EBBL;
@@ -7858,9 +7945,15 @@ xm[5] = 300;  ym[5] = 454;
             }
 
 
+
+
+/*
+CenterT00[1][BigO] = L02
+*/
+
 for(int BigO=0; BigO<=Order/2; BigO++)
 {
-Histogram[0] << (Hist[0][BigO]*h*h) << " " << L01 << "  " << L02 << "  ";
+Histogram[0] << (Hist[0][BigO]*h*h) << " ";
 Histogram[1] << (Hist[1][BigO]*h*h) << " ";
 Histogram[2] << (Hist[2][BigO]*h*h) << " ";
 Histogram[3] << (Hist[3][BigO]*h*h) << " ";
@@ -7891,6 +7984,9 @@ EBHistogram[3] << (EBHist[3][BigO]*h*h) << "  ";
 
 EccHist[0] << (Ecc[0][BigO]) << "  ";
 EccHist[1] << (Ecc[1][BigO]) << "  ";
+
+PeakHist[0] << CenterT00[0][BigO] << "  ";
+PeakHist[1] << CenterT00[1][BigO] << "  ";
 }
 Histogram[0] << endl;
 Histogram[1] << endl;
@@ -7914,8 +8010,12 @@ EBHistogram[1] << endl;
 EBHistogram[2] << endl;
 EBHistogram[3] << endl;
 
+EccHist[0] << " CM: " << CMX << "  " << CMY;
 EccHist[0] << endl;
 EccHist[1] << endl;
+
+PeakHist[0] << endl;
+PeakHist[1] << endl;
 
 
 if(NucMethod == 1)
@@ -8220,18 +8320,24 @@ EccHist[1].close();
 
 cout << "Out of N" << endl;
 
-      ofstream PrintMu[2];
-      PrintMu[0].open("Mu0.txt");
-      PrintMu[1].open("Mu1.txt");
+      ofstream PrintMu[2][2];
+      PrintMu[0][0].open("Mu0.txt");
+      PrintMu[0][1].open("Mu1.txt");
+      PrintMu[1][0].open("MuMu.txt");
+      PrintMu[1][1].open("MuDMu.txt");
       for(int x=0; x<ARRAY; x++)
       {
          for(int y=0; y<ARRAY; y++)
          {
-            PrintMu[0] << MuShapeCenter[0][x][y] << "  ";
-            PrintMu[1] << MuShapeCenter[1][x][y] << "  ";
+            PrintMu[0][0] << MuShapeCenter[0][0][x][y] << "  ";
+            PrintMu[0][1] << MuShapeCenter[1][0][x][y] << "  ";
+            PrintMu[1][0] << MuShapeCenter[0][1][x][y] << "  ";
+            PrintMu[1][1] << MuShapeCenter[1][1][x][y] << "  ";
          }
-         PrintMu[0] << endl;
-         PrintMu[1] << endl;
+         PrintMu[0][0] << endl;
+         PrintMu[0][1] << endl;
+         PrintMu[1][0] << endl;
+         PrintMu[1][1] << endl;
       }
 
       ofstream PrintAx[2];
@@ -8284,10 +8390,12 @@ cout << "Out of N" << endl;
 
 
        ofstream PrintT[10];
+       ofstream PrintT03FT[2];
        ofstream PrintCS;
        for(int BigO=0; BigO<=(Order/2); BigO++)
        {
           ostringstream TheDamnName[10];
+          ostringstream TheFTName[2];
           ostringstream CSName;
                    
           if(BigO < 10)
@@ -8303,7 +8411,7 @@ cout << "Out of N" << endl;
              TheDamnName[7] << "T" << 2 << 2 << "_" << "0" << BigO << ".txt";
              TheDamnName[8] << "T" << 2 << 3 << "_" << "0" << BigO << ".txt";
              TheDamnName[9] << "T" << 3 << 3 << "_" << "0" << BigO << ".txt";
-             
+       
              CSName << "EB_" << "0" << BigO << ".txt";
 
           }
@@ -8324,6 +8432,9 @@ cout << "Out of N" << endl;
              CSName << "EB_" << BigO << ".txt";
           }
 
+          TheFTName[0] << "T" << 0 << 3 << "_" << "FT_ReSq" << ".txt";
+          TheFTName[1] << "T" << 0 << 3 << "_" << "FT_ImSq" << ".txt";
+
           PrintT[0].open(TheDamnName[0].str());
           PrintT[1].open(TheDamnName[1].str());
           PrintT[2].open(TheDamnName[2].str());
@@ -8335,6 +8446,9 @@ cout << "Out of N" << endl;
           PrintT[7].open(TheDamnName[7].str());
           PrintT[8].open(TheDamnName[8].str());
           PrintT[9].open(TheDamnName[9].str());
+          
+          PrintT03FT[0].open(TheFTName[0].str());
+          PrintT03FT[1].open(TheFTName[1].str());
           
           PrintCS.open(CSName.str());
                 
@@ -8370,6 +8484,17 @@ cout << "Out of N" << endl;
              
              PrintCS << endl;
           }
+
+          for(int x=0; x<(2*size+1); x++)
+          {
+             for(int y=0; y<(2*size+1); y++)
+             {
+                PrintT03FT[0] << T03FT[0][x][y] << " ";
+                PrintT03FT[1] << T03FT[1][x][y] << " ";
+             }
+             PrintT03FT[0] << endl;
+             PrintT03FT[1] << endl;
+          }
                    
           PrintT[0].close();
           TheDamnName[0].str(std::string());
@@ -8394,6 +8519,11 @@ cout << "Out of N" << endl;
           TheDamnName[9].str(std::string());
           PrintCS.close();
           CSName.str(std::string());
+          
+          PrintT03FT[0].close();
+          TheFTName[0].str(std::string());
+          PrintT03FT[1].close();
+          TheFTName[1].str(std::string());
        }
        
 cout << "All writted!" << endl;
